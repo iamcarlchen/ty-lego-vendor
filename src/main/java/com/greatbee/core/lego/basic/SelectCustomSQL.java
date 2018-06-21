@@ -150,16 +150,12 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
         output.setOutputValue(Output_Key_Data,responseData);
 
         //拉取所有的常用(common)输出配置
-        java.util.List outputFields = output.getOutputField(IOFT.Common);
+        java.util.List outputFields = output.getOutputField(IOFT.Read);
         if(CollectionUtil.isValid(outputFields)) {
             Iterator ofs = outputFields.iterator();
             while(ofs.hasNext()) {
                 OutputField outputField = (OutputField)ofs.next();
                 ArrayList datas = new ArrayList();
-                if(outputField.getFieldValue()!=null||Output_Key_Data.equalsIgnoreCase(outputField.getFieldName())){
-                    //如果已经有值，或者是固定返回值，则不再设置
-                    continue;
-                }
                 for(int i = 0; i < result.size(); ++i) {
                     Data data = (Data)result.get(i);
                     Object outputFieldValue = data.get(outputField.getFieldName());
