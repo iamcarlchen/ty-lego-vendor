@@ -69,9 +69,12 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
         //lego 处理逻辑
         String sqlTpl = input.getInputValue(Input_Key_SQL_TPL);
         String countSqlTpl = input.getInputValue(Input_Key_Count_SQL_TPL);
-        String returnType = DataUtil.getString(input.getInputValue(Input_Key_Return_Type), "list");
+        String returnType = DataUtil.getString(input.getInputValue(Input_Key_Return_Type), Return_Type_List);
         String dsAlias = input.getInputValue(Input_Key_DS_Alias);
 
+        if(StringUtil.isInvalid(returnType)){
+            returnType = Return_Type_List;
+        }
         if(StringUtil.isInvalid(dsAlias)){
             //如果dsAlias无效
             throw new LegoException("请配置ds",ERROR_LEGO_DS_ALIAS_IS_NULL);
@@ -234,7 +237,8 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
                             ResultSetMetaData md = resultSet.getMetaData(); //获得结果集结构信息,元数据
                             int columnCount = md.getColumnCount();   //获得列数
                             for (int i = 1; i <= columnCount; i++) {
-                                data.put(md.getColumnName(i), resultSet.getObject(i));
+                                Object o = resultSet.getObject(i);
+                                data.put(md.getColumnName(i), o==null?"":o);
                             }
                         }
                     }.execute(rs, data);
