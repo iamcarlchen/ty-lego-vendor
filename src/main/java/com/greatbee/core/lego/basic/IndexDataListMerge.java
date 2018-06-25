@@ -54,7 +54,8 @@ public class IndexDataListMerge implements ExceptionCode, Lego {
                 //如果是多个主列字段
                 indexNames = indexName.split(",");
             }
-            for(String index:indexList){
+            for(int i=0;i<indexList.size();i++){
+                String index = String.valueOf(indexList.get(i));
                 Data data = new Data();
                 int _index = 0;//主列序号
                 String _indexName = indexNames!=null?indexNames[_index]:indexName;
@@ -96,16 +97,17 @@ public class IndexDataListMerge implements ExceptionCode, Lego {
                 //如果配置了额外参数，直接塞进去
                 if(CollectionUtil.isValid(extraInputFields)){
                     for(InputField extraIf:extraInputFields){
+                        if(Input_Key_Index_Data_List.equalsIgnoreCase(extraIf.getFieldName())||Input_Key_Index_Names.equalsIgnoreCase(extraIf.getFieldName())){
+                            continue;
+                        }
                         data.put(extraIf.getFieldName(),extraIf.getFieldValue());
                     }
                 }
                 list.add(data);
             }
         }
-
-        DataList merge = new DataList(list);
         //返回客户端
-        output.setOutputValue(Output_Key_Merged_Data_List,merge);
+        output.setOutputValue(Output_Key_Merged_Data_List,list);
 
     }
 
