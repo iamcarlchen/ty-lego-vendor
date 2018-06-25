@@ -38,7 +38,7 @@ public class IndexDataListMerge implements ExceptionCode, Lego {
     public void execute(Input input, Output output) throws LegoException {
         //lego 处理逻辑
         java.util.List<String> indexList = (java.util.List<String>) input.getInputObjectValue(Input_Key_Index_Data_List);
-        String indexName = input.getInputValue(Input_Key_Index_Names);//主列的名称
+        String indexName = input.getInputValue(Input_Key_Index_Names);//主列的名称 ，如果是多个，第一个必须是index_data_list的列名
         //获取memory 的输入字段 , 合并的列需要配置在memory下
         java.util.List<InputField> inputFields = input.getInputField(IOFT.Memory);
         //list 如果有额外的列需要加到list 需要在common中配置
@@ -49,9 +49,17 @@ public class IndexDataListMerge implements ExceptionCode, Lego {
             if(StringUtil.isInvalid(indexName)){
                 throw new LegoException("索引列名没有配置",Lego_Error_Data_List_Merge_Index_Name_Null);
             }
+            String[] indexNames = null;
+            if(indexName.contains(",")){
+                //如果是多个主列字段
+                indexNames = indexName.split(",");
+            }
             for(String index:indexList){
                 Data data = new Data();
-                data.put(indexName,index);
+                int _index = 0;//主列序号
+                String _indexName = indexNames!=null?indexNames[_index]:indexName;
+                data.put(_indexName,index);
+                _index++;//第一个必须是 index_data_list  列名
                 for(InputField _if:inputFields){
                     Object ifItem = _if.getFieldValue();
                     if(ifItem instanceof DataList){
@@ -61,11 +69,12 @@ public class IndexDataListMerge implements ExceptionCode, Lego {
                             continue;
                         }
                         for(Data _data:itemList){
-                            if(_data.containsKey(indexName) && index.equalsIgnoreCase(_data.getString(indexName))){
+
+                            if(_data.containsKey(_indexName) && index.equalsIgnoreCase(_data.getString(_indexName))){
                                 //有这个值，并且相等时，将其他值赋给data
                                 foundIndexName = true;
                                 for(Map.Entry<String,Object> entry:_data.entrySet()){
-                                    if(!indexName.equalsIgnoreCase(entry.getKey())){
+                                    if(!_indexName.equalsIgnoreCase(entry.getKey())){
                                         //存到map
                                         data.put(entry.getKey(),entry.getValue());
                                     }
@@ -75,13 +84,14 @@ public class IndexDataListMerge implements ExceptionCode, Lego {
                         }
                         if(!foundIndexName){
                             for(Map.Entry<String,Object> entry:itemList.get(0).entrySet()){
-                                if(!indexName.equalsIgnoreCase(entry.getKey())){
+                                if(!_indexName.equalsIgnoreCase(entry.getKey())){
                                     //存到map
                                     data.put(entry.getKey(),0);//如果没有找到，就存0进去， TODO 后面考虑是否需要加上默认值
                                 }
                             }
                         }
                     }
+                    _index++;
                 }
                 //如果配置了额外参数，直接塞进去
                 if(CollectionUtil.isValid(extraInputFields)){
