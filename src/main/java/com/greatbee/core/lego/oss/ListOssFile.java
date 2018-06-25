@@ -62,7 +62,7 @@ public class ListOssFile extends OssBase{
             List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
 
             for (OSSObjectSummary s : sums) {
-                //TODO 转换成data_page方式
+
                 System.out.println("\t" + s.getKey());
             }
             nextMarker = objectListing.getNextMarker();
