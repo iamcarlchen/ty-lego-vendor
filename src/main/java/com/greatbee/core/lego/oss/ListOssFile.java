@@ -24,7 +24,7 @@ import java.util.List;
  * @author xiaobc
  * @date 18/6/21
  */
-@Component("createOssStorage")
+@Component("listOssFile")
 public class ListOssFile extends OssBase{
     private static final Logger logger = Logger.getLogger(ListOssFile.class);
 
