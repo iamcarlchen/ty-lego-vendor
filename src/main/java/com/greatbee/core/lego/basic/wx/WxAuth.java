@@ -59,13 +59,23 @@ public abstract class WxAuth implements ExceptionCode, Lego{
 
     /**
      * 获取授权authUrl
+     *  wxAuthUseAgent 使用中间代理跳转（解决微信授权域名只能配置一个的问题）
+     *
+     *  不用代理地址：https://open.weixin.qq.com/connect/oauth2/authorize?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SCOPE&state=STATE#wechat_redirect
+     *  用代理地址：http://www.abc.com/xxx/get-weixin-code.html?appid=XXXX&scope=snsapi_base&state=hello-world&redirect_uri=http%3A%2F%2Fwww.xyz.com%2Fhello-world.html
      *
      * @return
      * @throws UnsupportedEncodingException
      */
-    protected String getAuthUrl(String appId,String redirectUrl,String scope,String state) throws UnsupportedEncodingException {
-        StringBuilder urlBuilder = new StringBuilder(WX_Open_Host);
-        urlBuilder.append("/connect/oauth2/authorize?");
+    protected String getAuthUrl(String wxAuthUseAgent,String appId,String redirectUrl,String scope,String state) throws UnsupportedEncodingException {
+        StringBuilder urlBuilder = new StringBuilder();
+        if(StringUtil.isValid(wxAuthUseAgent)){
+            urlBuilder.append(wxAuthUseAgent);
+        }else{
+            urlBuilder.append(WX_Open_Host);
+            urlBuilder.append("/connect/oauth2/authorize");
+        }
+        urlBuilder.append("?");
         urlBuilder.append("appid=").append(appId);
         urlBuilder.append("&redirect_uri=").append(URLEncoder.encode(redirectUrl, Charset.UTF_8));
         urlBuilder.append("&response_type=code");

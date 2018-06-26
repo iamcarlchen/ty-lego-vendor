@@ -33,6 +33,8 @@ public class WxGetAuthUrl extends WxAuth{
     private static final String Input_Key_Wx_Scope = "scope";
     private static final String Input_Key_Wx_State = "state";
 
+    private static final String Input_Key_Wx_Auth_Use_Agent = "wxAuthUseAgent";//微信授权是否使用代理，主要原因是因为微信授权域名只能配置一个，需要一个中间域名转发
+
     private static final String Output_Key_Wx_Auth_Url = "authUrl";//微信授权url
 
     private static final int UN_WX_Login_Code = -401;//-401 表示 微信没有登录，直接跳转到微信授权登录界面,前台在接口调用的地方处理微信环境下-401跳转
@@ -48,13 +50,15 @@ public class WxGetAuthUrl extends WxAuth{
         String redirectUrl = input.getInputValue(Input_Key_Wx_Redirect_Url);
         String scope = input.getInputValue(Input_Key_Wx_Scope);
         String state = input.getInputValue(Input_Key_Wx_State);
+        //微信授权代理地址
+        String wxAuthUseAgent = input.getInputValue(Input_Key_Wx_Auth_Use_Agent);
 
         Map params = buildTplParams(input);
         state = LegoUtil.transferInputValue(state, params);//附带参数可能需要模板
         redirectUrl = LegoUtil.transferInputValue(redirectUrl, params);//可能多个环境不一样，所以这里需要支持模板
 
         try {
-            resultWxAuthUrl = getAuthUrl(appId, redirectUrl,(StringUtil.isInvalid(scope)?WX_Login_Scope_Base:scope),state);
+            resultWxAuthUrl = getAuthUrl(wxAuthUseAgent,appId, redirectUrl,(StringUtil.isInvalid(scope)?WX_Login_Scope_Base:scope),state);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             throw new LegoException("获取微信授权URL失败",ERROR_LEGO_WX_Get_Auth_Url_Error);

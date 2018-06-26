@@ -9,6 +9,7 @@ import com.greatbee.core.bean.server.FileStorage;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.util.LegoUtil;
 import com.greatbee.core.manager.TYDriver;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * ossUploadFile
@@ -32,6 +34,7 @@ public class OssUploadFile extends OssBase{
     private static final Logger logger = Logger.getLogger(OssUploadFile.class);
 
     private static final String Input_Key_File_Stream = "file_stream";
+
 
     private static final long Lego_Error_No_File_Need_To_Upload = 300027L;
     private static final long Lego_Error_File_Stream_Error = 300028L;
@@ -57,6 +60,9 @@ public class OssUploadFile extends OssBase{
         if(objectValue == null) {
             throw new LegoException("没有需要上传的文件", Lego_Error_No_File_Need_To_Upload);
         }
+        String downloadUrl = input.getInputValue(Input_Key_File_Download_Url);
+        Map params = buildTplParams(input);
+        String url = LegoUtil.transferInputValue(downloadUrl, params);//附带参数可能需要模板
 
         //上传文件
         if(objectValue instanceof MultipartFile) {
@@ -83,6 +89,7 @@ public class OssUploadFile extends OssBase{
             output.setOutputValue(Output_Key_File_Size, Long.valueOf(fileSize));
             output.setOutputValue(Output_Key_File_Type, fileType);
             output.setOutputValue(Output_Key_File_Content_Type, contentType);
+            output.setOutputValue(Output_Key_File_Url,url+serializeName);
 
             FileStorage fileStorage = new FileStorage();
             fileStorage.setContentType(contentType);
@@ -90,6 +97,7 @@ public class OssUploadFile extends OssBase{
             fileStorage.setOiAlias(bucketName);//oiAlias 存 bucketName
             fileStorage.setOriginalName(originalName);
             fileStorage.setSerializeName(serializeName);
+            fileStorage.setFileType(fileType);
             try {
                 this.tyDriver.getFileStorageManager().add(fileStorage);
             } catch (DBException e) {

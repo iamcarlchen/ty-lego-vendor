@@ -3,10 +3,16 @@ package com.greatbee.core.lego.oss;
 import com.aliyun.oss.OSSClient;
 import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.ExceptionCode;
+import com.greatbee.core.bean.server.InputField;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.Lego;
 import com.greatbee.core.lego.LegoException;
+import com.greatbee.core.lego.util.LegoUtil;
 import org.apache.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * OssBase
@@ -32,6 +38,10 @@ public abstract class OssBase implements ExceptionCode, Lego {
 
     //OSS 范围内必须是全局唯一的，一旦创建之后无法修改名称。
     protected static final String Input_Key_Oss_Bucket_Name = "bucketName";//oss  存储空间名字
+    //拼接上传或者查询，返回文件url，方便显示或者下载
+    protected static final String Input_Key_File_Download_Url = "oss_download_url";
+    //文件url
+    protected static final String Output_Key_File_Url = "file_url";
 
     /**
      * 创建OSS客户端
@@ -76,6 +86,26 @@ public abstract class OssBase implements ExceptionCode, Lego {
         if(ossClient!=null){
             ossClient.shutdown();
         }
+    }
+
+
+    /**
+     * 构建tpl模板需要的请求参数
+     * @param input
+     * @return
+     * @throws LegoException
+     */
+    protected Map buildTplParams(Input input) throws LegoException {
+        java.util.List ifs = input.getInputFields();
+        HashMap params = new HashMap();
+        params.put("request", LegoUtil.getParameterMap(input.getRequest()));
+        params.put("session", LegoUtil.getSessionAttributeMap(input.getRequest()));
+        Iterator result = ifs.iterator();
+        while(result.hasNext()) {
+            InputField _if = (InputField)result.next();
+            params.put(_if.getFieldName(), _if.getFieldValue());
+        }
+        return params;
     }
 
 
