@@ -57,7 +57,7 @@ public class WxGetUserInfo extends WxAuth{
         //如果配置了其他输出，只要在userInfo中都返回
         java.util.List<OutputField> ofs = output.getOutputFields();
         for(OutputField of:ofs){
-            if(userInfo.containsKey(of.getFieldName())&&of.getFieldValue()!=null){
+            if(userInfo.containsKey(of.getFieldName())&&of.getFieldValue()==null){
                 of.setFieldValue(userInfo.getString(of.getFieldName()));
             }
         }
