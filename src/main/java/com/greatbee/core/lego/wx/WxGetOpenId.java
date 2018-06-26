@@ -1,11 +1,10 @@
-package com.greatbee.core.lego.basic;
+package com.greatbee.core.lego.wx;
 
 import com.greatbee.base.bean.DBException;
 import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
-import com.greatbee.core.lego.basic.wx.WxAuth;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 

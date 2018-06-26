@@ -1,4 +1,4 @@
-package com.greatbee.core.lego.basic.wx;
+package com.greatbee.core.lego.wx;
 
 import com.alibaba.fastjson.JSONObject;
 import com.greatbee.base.bean.DBException;
