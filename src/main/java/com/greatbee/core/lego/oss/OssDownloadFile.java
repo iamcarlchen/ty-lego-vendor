@@ -71,12 +71,11 @@ public class OssDownloadFile extends OssBase {
 
             FileStream fileStream = new FileStream(content);
             fileStream.setContentType(fileStorage.getContentType());
-            fileStream.setFileName(StringUtil.isValid(fileName)?fileName + now + "." + fileStorage.getFileType():fileStorage.getOriginalName());
+            fileStream.setFileName(StringUtil.isValid(fileName) ? fileName + now + "." + fileStorage.getFileType() : fileStorage.getOriginalName());
             output.setOutputValue(Output_Key_File_Stream, fileStream);
+
         } catch (DBException e) {
             e.printStackTrace();
-        }finally {
-            this.closeClient(ossClient);
         }
     }
 
