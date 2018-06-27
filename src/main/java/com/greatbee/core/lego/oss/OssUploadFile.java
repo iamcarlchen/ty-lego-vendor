@@ -89,7 +89,7 @@ public class OssUploadFile extends OssBase{
             output.setOutputValue(Output_Key_File_Size, Long.valueOf(fileSize));
             output.setOutputValue(Output_Key_File_Type, fileType);
             output.setOutputValue(Output_Key_File_Content_Type, contentType);
-            output.setOutputValue(Output_Key_File_Url,url+serializeName);
+            output.setOutputValue(Output_Key_File_Url, url + serializeName);
 
             FileStorage fileStorage = new FileStorage();
             fileStorage.setContentType(contentType);
@@ -98,6 +98,8 @@ public class OssUploadFile extends OssBase{
             fileStorage.setOriginalName(originalName);
             fileStorage.setSerializeName(serializeName);
             fileStorage.setFileType(fileType);
+            fileStorage.setFileUrl(url+serializeName);
+            fileStorage.setUploadType("oss");
             try {
                 this.tyDriver.getFileStorageManager().add(fileStorage);
             } catch (DBException e) {
