@@ -11,26 +11,28 @@ import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
 import com.greatbee.core.lego.util.LegoUtil;
 import com.greatbee.core.manager.TYDriver;
+import net.sf.jmimemagic.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 /**
  * ossUploadFile
- *
+ * <p>
  * OSS上传文件
- *
+ * <p>
  * input:Input_Key_Oss_Endpoint,Input_Key_Oss_Access_Key_Id,Input_Key_Oss_Access_Key_Secret,Input_Key_Oss_Bucket_Name
  *
  * @author xiaobc
  * @date 18/6/21
  */
 @Component("ossUploadFile")
-public class OssUploadFile extends OssBase{
+public class OssUploadFile extends OssBase {
     private static final Logger logger = Logger.getLogger(OssUploadFile.class);
 
     private static final String Input_Key_File_Stream = "file_stream";
@@ -53,11 +55,11 @@ public class OssUploadFile extends OssBase{
     public void execute(Input input, Output output) throws LegoException {
         //lego 处理逻辑
         String bucketName = input.getInputValue(Input_Key_Oss_Bucket_Name);
-        if(StringUtil.isInvalid(bucketName)){
-            throw new LegoException("OSS存储空间名称无效",ERROR_LEGO_OSS_Bucket_Name_Null);
+        if (StringUtil.isInvalid(bucketName)) {
+            throw new LegoException("OSS存储空间名称无效", ERROR_LEGO_OSS_Bucket_Name_Null);
         }
         Object objectValue = input.getInputObjectValue(Input_Key_File_Stream);
-        if(objectValue == null) {
+        if (objectValue == null) {
             throw new LegoException("没有需要上传的文件", Lego_Error_No_File_Need_To_Upload);
         }
         String downloadUrl = input.getInputValue(Input_Key_File_Download_Url);
@@ -65,23 +67,50 @@ public class OssUploadFile extends OssBase{
         String url = LegoUtil.transferInputValue(downloadUrl, params);//附带参数可能需要模板
 
         //上传文件
-        if(objectValue instanceof MultipartFile) {
+        if (objectValue instanceof MultipartFile || objectValue instanceof File) {
             //创建oss对象
             OSSClient ossClient = this.createClient(input);
 
-            MultipartFile file = (MultipartFile)objectValue;
-            String originalName = file.getOriginalFilename();
-            long fileSize = file.getSize();
-            String fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
-            String serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
-            String contentType = file.getContentType();
-
-            //上传文件
+            String originalName = "";
+            long fileSize = 0;
+            String fileType = "";
+            String serializeName = "";
+            String contentType = "";
             try {
-                ossClient.putObject(new PutObjectRequest(bucketName, serializeName, file.getInputStream()));
+                if (objectValue instanceof MultipartFile) {
+                    MultipartFile file = (MultipartFile) objectValue;
+                    originalName = file.getOriginalFilename();
+                    fileSize = file.getSize();
+                    fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
+                    serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
+                    contentType = file.getContentType();
+                    //上传文件
+                    ossClient.putObject(new PutObjectRequest(bucketName, serializeName, file.getInputStream()));
+                }else{
+                    File file = (File) objectValue;
+                    originalName = file.getName();
+                    fileSize = file.length();
+                    fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
+                    serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
+
+                    Magic parser = new Magic() ;
+                    MagicMatch match = parser.getMagicMatch(file,false);
+                    contentType = match.getMimeType();
+                    //上传文件
+                    ossClient.putObject(new PutObjectRequest(bucketName, serializeName, file));
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-                throw new LegoException("文件流错误",Lego_Error_File_Stream_Error);
+                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
+            } catch (MagicMatchNotFoundException e) {
+                e.printStackTrace();
+                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
+            } catch (MagicException e) {
+                e.printStackTrace();
+                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
+            } catch (MagicParseException e) {
+                e.printStackTrace();
+                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
             }
 
             output.setOutputValue(Output_Key_File_Original_name, originalName);
@@ -98,14 +127,14 @@ public class OssUploadFile extends OssBase{
             fileStorage.setOriginalName(originalName);
             fileStorage.setSerializeName(serializeName);
             fileStorage.setFileType(fileType);
-            fileStorage.setFileUrl(url+serializeName);
+            fileStorage.setFileUrl(url + serializeName);
             fileStorage.setUploadType("oss");
             try {
                 this.tyDriver.getFileStorageManager().add(fileStorage);
             } catch (DBException e) {
                 e.printStackTrace();
-                throw new LegoException(e.getMessage(),e.getCode());
-            }finally {
+                throw new LegoException(e.getMessage(), e.getCode());
+            } finally {
                 this.closeClient(ossClient);
             }
             output.setOutputValue(Output_Key_File_Storage, fileStorage);
