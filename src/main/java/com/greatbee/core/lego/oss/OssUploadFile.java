@@ -11,7 +11,6 @@ import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
 import com.greatbee.core.lego.util.LegoUtil;
 import com.greatbee.core.manager.TYDriver;
-import net.sf.jmimemagic.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -93,25 +92,26 @@ public class OssUploadFile extends OssBase {
                     fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
                     serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
 
-                    Magic parser = new Magic() ;
-                    MagicMatch match = parser.getMagicMatch(file,false);
-                    contentType = match.getMimeType();
+//                    Magic parser = new Magic() ;
+//                    MagicMatch match = parser.getMagicMatch(file,false);
+//                    contentType = match.getMimeType();
                     //上传文件
                     ossClient.putObject(new PutObjectRequest(bucketName, serializeName, file));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
-            } catch (MagicMatchNotFoundException e) {
-                e.printStackTrace();
-                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
-            } catch (MagicException e) {
-                e.printStackTrace();
-                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
-            } catch (MagicParseException e) {
-                e.printStackTrace();
-                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
             }
+//            catch (MagicMatchNotFoundException e) {
+//                e.printStackTrace();
+//                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
+//            } catch (MagicException e) {
+//                e.printStackTrace();
+//                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
+//            } catch (MagicParseException e) {
+//                e.printStackTrace();
+//                throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
+//            }
 
             output.setOutputValue(Output_Key_File_Original_name, originalName);
             output.setOutputValue(Output_Key_File_Serialize_name, serializeName);
@@ -127,8 +127,8 @@ public class OssUploadFile extends OssBase {
             fileStorage.setOriginalName(originalName);
             fileStorage.setSerializeName(serializeName);
             fileStorage.setFileType(fileType);
-            fileStorage.setFileUrl(url + serializeName);
-            fileStorage.setUploadType("oss");
+//            fileStorage.setFileUrl(url + serializeName);
+//            fileStorage.setUploadType("oss");
             try {
                 this.tyDriver.getFileStorageManager().add(fileStorage);
             } catch (DBException e) {
