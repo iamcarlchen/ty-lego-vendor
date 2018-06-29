@@ -124,11 +124,11 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
 
         ArrayList result = (ArrayList) _mysqlDBHandle(false,dsAlias,sqlTpl,tplParams);
         DataList dataList = new DataList(result);
-        if(returnType==Return_Type_Data){
+        if(Return_Type_Data.equalsIgnoreCase(returnType)){
             responseData = CollectionUtil.isValid(result)?result.get(0):new Data();
-        }else if(returnType == Return_Type_List){
+        }else if(Return_Type_List.equalsIgnoreCase(returnType)){
             responseData = dataList;
-        }else if(returnType == Return_Type_Page){
+        }else if(Return_Type_Page.equalsIgnoreCase(returnType)){
             int page = DataUtil.getInt(input.getInputValue("page"), 1);
             int pageSize = DataUtil.getInt(input.getInputValue("pageSize"), 10);
             if(page <= 0) {
@@ -197,14 +197,19 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
                     String regular = "%?<#([A-Za-z]+).*?>.*?</#\\1>%?|%?\\$\\{.*?\\}%?";
                     Pattern pet = Pattern.compile(regular);
                     Matcher match = pet.matcher(sqlTpl);
-                    java.util.List<String> params = new ArrayList<String>();
+                    java.util.List<Object> params = new ArrayList<Object>();
                     while(match.find()){
                         String matchStr = match.group();
                         try {
                             //针对like 语句优化
                             boolean leftLike = matchStr.startsWith("%");
                             boolean rightLike = matchStr.endsWith("%");
-                            params.add((leftLike?"%":"")+LegoUtil.transferInputValue(matchStr,tplParams)+(rightLike?"%":""));
+                            String transferStr = LegoUtil.transferInputValue(matchStr, tplParams);
+                            if(matchStr.endsWith("?number}")){
+                                params.add(Integer.valueOf(transferStr));
+                            }else{
+                                params.add((leftLike?"%":"")+transferStr+(rightLike?"%":""));
+                            }
                         } catch (LegoException e) {
                             e.printStackTrace();
                             throw new DBException(e.getMessage(),e.getCode());
