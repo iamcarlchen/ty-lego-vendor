@@ -194,9 +194,19 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
             ps = new QueryHandler(){
                 @Override
                 public PreparedStatement execute(Connection connection, PreparedStatement preparedStatement) throws SQLException, DBException {
-                    String regular = "%?<#([A-Za-z]+).*?>.*?</#\\1>%?|%?\\$\\{.*?\\}%?";
+//                    String regular = "%?<#([A-Za-z]+).*?>.*?</#\\1>%?|%?\\$\\{.*?\\}%?";
+                    String expressReg = "%?<#([A-Za-z]+).*?>.*?</#\\1>%?";
+                    Matcher expressMatch = Pattern.compile(expressReg).matcher(sqlTpl);
+                    java.util.List<String> tmpParams = new ArrayList<String>();
+                    String sqlTmpTpl = sqlTpl.replaceAll(expressReg, "__T__");//中间转换一下
+                    while(expressMatch.find()){
+                        tmpParams.add(expressMatch.group());
+                    }
+
+                    String regular = "%?\\$\\{.*?\\}%?";//如果是带<#的标签  说明是复杂的脚本，为了功能更强大<# 标签不做prepareStatement处理
                     Pattern pet = Pattern.compile(regular);
-                    Matcher match = pet.matcher(sqlTpl);
+                    Matcher match = pet.matcher(sqlTmpTpl);
+
                     java.util.List<Object> params = new ArrayList<Object>();
                     while(match.find()){
                         String matchStr = match.group();
@@ -215,7 +225,21 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
                             throw new DBException(e.getMessage(),e.getCode());
                         }
                     }
-                    String psSqlTpl = sqlTpl.replaceAll(regular,"?");
+                    String psSqlTpl = sqlTmpTpl.replaceAll(regular,"?");
+                    try {
+                        //还原 sqlTmpTpl
+                        if(CollectionUtil.isValid(tmpParams)){
+                            for(String item:tmpParams){
+                                //replaceFirst 这个方法 两个参数都是正则表达式
+                                psSqlTpl = psSqlTpl.replaceFirst("__T__", _makeQueryStringAllRegExp(item));
+                            }
+                        }
+                        //可能有不需要换成?的模板
+                        psSqlTpl = LegoUtil.transferInputValue(psSqlTpl, tplParams);
+                    } catch (LegoException e) {
+                        e.printStackTrace();
+                        throw new DBException(e.getMessage(),e.getCode());
+                    }
                     preparedStatement = connection.prepareStatement(psSqlTpl);
                     for(int i=0;i<params.size();i++){
                         preparedStatement.setObject(i+1,params.get(i));
@@ -269,6 +293,25 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
             }
         }
 
+    }
+
+
+    /**
+     * 转义正则特殊字符 （$()*+.[]?\^{}
+     * \\需要第一个替换，否则replace方法替换时会有逻辑bug
+     */
+    private String _makeQueryStringAllRegExp(String str) {
+        if (StringUtil.isInvalid(str)){
+            return str;
+        }
+        return str.replace("\\", "\\\\").replace("*", "\\*")
+                .replace("+", "\\+").replace("|", "\\|")
+                .replace("{", "\\{").replace("}", "\\}")
+                .replace("(", "\\(").replace(")", "\\)")
+                .replace("^", "\\^").replace("$", "\\$")
+                .replace("[", "\\[").replace("]", "\\]")
+                .replace("?", "\\?").replace(",", "\\,")
+                .replace(".", "\\.").replace("&", "\\&");
     }
 
 
