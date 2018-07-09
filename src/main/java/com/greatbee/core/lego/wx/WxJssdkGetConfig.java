@@ -6,6 +6,7 @@ import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.wx.util.WxUtil;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,7 @@ public class WxJssdkGetConfig extends WxAuth{
         }
 
         try {
-            JSONObject wxConfig = this.getSignature(signUrl,appId,secret);
+            JSONObject wxConfig = WxUtil.getSignature(signUrl, appId, secret);
             output.setOutputValue(Output_Key_Wx_Config,wxConfig);
         } catch (DBException e) {
             e.printStackTrace();
