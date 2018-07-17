@@ -70,6 +70,8 @@ public class AudioTransfer implements ExceptionCode, Lego {
     //oss下载地址
     private static final String Input_Key_File_Oss_Download_Url = "oss_download_url";
 
+    private static final String Input_Key_Qiniu_Format_String = "formatString";//七牛处理规格
+
 
     private static final String Input_Key_File_Stream = "file_stream";//文件流
 
@@ -91,6 +93,8 @@ public class AudioTransfer implements ExceptionCode, Lego {
         String targetType = input.getInputValue(Input_Key_Qiniu_Target_Type);//需要转换的文件格式 默认是mp3
         String saveStorage = input.getInputValue(Input_Key_Is_Save_Storage);//是否保存到storage表中
         String persistentUrl = input.getInputValue(Input_Key_Qiniu_Persistent_Url);
+
+        String formatString = input.getInputValue(Input_Key_Qiniu_Format_String);
 
         if(StringUtil.isInvalid(accessKey)||StringUtil.isInvalid(secretKey)){
             throw new LegoException("密钥、公钥配置无效",ERROR_LEGO_QINIU_SECRET_INVALIDATE);
@@ -169,7 +173,7 @@ public class AudioTransfer implements ExceptionCode, Lego {
                 }
                 StringMap putPolicy = new StringMap();
                 String saveAMREntry = String.format("%s:%s", bucket,key);
-                String avthumbMp3Fop = String.format("avthumb/%s|saveas/%s", targetType, UrlSafeBase64.encodeToString(saveAMREntry));
+                String avthumbMp3Fop = String.format("avthumb/%s%s|saveas/%s", targetType,formatString, UrlSafeBase64.encodeToString(saveAMREntry));
                 //将多个数据处理指令拼接起来
                 String persistentOpfs = StringUtils.join(new String[]{
                         avthumbMp3Fop
