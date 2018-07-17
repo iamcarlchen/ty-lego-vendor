@@ -62,6 +62,7 @@ public class OssUploadFile extends OssBase {
         if (objectValue == null) {
             throw new LegoException("没有需要上传的文件", Lego_Error_No_File_Need_To_Upload);
         }
+        //构建下载地址
         String downloadUrl = input.getInputValue(Input_Key_File_Download_Url);
         Map params = buildTplParams(input);
         String url = LegoUtil.transferInputValue(downloadUrl, params);//附带参数可能需要模板
