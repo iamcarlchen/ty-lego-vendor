@@ -51,6 +51,7 @@ public class AudioTransfer implements ExceptionCode, Lego {
     private static final long ERROR_LEGO_QINIU_BUCKET_INVALIDATE = 300051L;
     private static final long ERROR_LEGO_QINIU_QUEUE_INVALIDATE = 300052L;
     private static final long ERROR_LEGO_QINIU_FILESTREAM_INVALIDATE = 300053L;
+    private static final long ERROR_LEGO_QINIU_PERSISTENT_INVALIDATE = 300054L;
 
     private static final String Input_Key_Qiniu_Zone = "zone";//服务器区域 zone  华东/华北/华南/北美
     private static final String Input_Key_Qiniu_Key = "key";//七牛公钥
@@ -62,13 +63,20 @@ public class AudioTransfer implements ExceptionCode, Lego {
 
     private static final String Input_Key_Qiniu_Target_Type = "targetType";//需要转换成什么类型的文件
 
+    private static final String Input_Key_Qiniu_Persistent_Url = "persistentUrl";//七牛处理完毕之后的回调接口
+
     //拼接上传或者查询，返回文件url，方便显示或者下载
-    protected static final String Input_Key_File_Download_Url = "qiniu_download_url";
+    private static final String Input_Key_File_Download_Url = "qiniu_download_url";
+    //oss下载地址
+    private static final String Input_Key_File_Oss_Download_Url = "oss_download_url";
+
 
     private static final String Input_Key_File_Stream = "file_stream";//文件流
 
     private static final String Output_Key_Target_File_Name = "fileName";//目标文件名
     private static final String Output_Key_Target_File_Path = "filePath";//目标文件地址 ,如果是图片，返回压缩后的图片地址   七牛地址
+
+    private static final String Output_Key_Target_Oss_File_Path = "ossfilePath";//oss目标下载文件
 
     @Autowired
     private TYDriver tyDriver;
@@ -82,6 +90,7 @@ public class AudioTransfer implements ExceptionCode, Lego {
         String properQueue = input.getInputValue(Input_Key_Qiniu_Proper_Queue);//七牛专有队列  上传用  数据处理队列名称
         String targetType = input.getInputValue(Input_Key_Qiniu_Target_Type);//需要转换的文件格式 默认是mp3
         String saveStorage = input.getInputValue(Input_Key_Is_Save_Storage);//是否保存到storage表中
+        String persistentUrl = input.getInputValue(Input_Key_Qiniu_Persistent_Url);
 
         if(StringUtil.isInvalid(accessKey)||StringUtil.isInvalid(secretKey)){
             throw new LegoException("密钥、公钥配置无效",ERROR_LEGO_QINIU_SECRET_INVALIDATE);
@@ -102,6 +111,8 @@ public class AudioTransfer implements ExceptionCode, Lego {
         String downloadUrl = input.getInputValue(Input_Key_File_Download_Url);
         Map params = _buildTplParams(input);
         String url = LegoUtil.transferInputValue(downloadUrl, params);//附带参数可能需要模板
+        String ossDownloadUrl = input.getInputValue(Input_Key_File_Oss_Download_Url);
+        String ossUrl = LegoUtil.transferInputValue(ossDownloadUrl, params);//附带参数可能需要模板
 
         try {
             InputStream is = null;
@@ -152,9 +163,13 @@ public class AudioTransfer implements ExceptionCode, Lego {
             //需要转码类型
             if(StringUtil.isValid(targetType)){
                 //创建 数据处理逻辑
+                if(StringUtil.isInvalid(persistentUrl)){
+                    //没有回调，抛错
+                    throw new LegoException("七牛数据处理回调无效",ERROR_LEGO_QINIU_PERSISTENT_INVALIDATE);
+                }
                 StringMap putPolicy = new StringMap();
                 String saveAMREntry = String.format("%s:%s", bucket,key);
-                String avthumbMp3Fop = String.format("avthumb/%s|saveas/%s", targetType,UrlSafeBase64.encodeToString(saveAMREntry));
+                String avthumbMp3Fop = String.format("avthumb/%s|saveas/%s", targetType, UrlSafeBase64.encodeToString(saveAMREntry));
                 //将多个数据处理指令拼接起来
                 String persistentOpfs = StringUtils.join(new String[]{
                         avthumbMp3Fop
@@ -164,7 +179,7 @@ public class AudioTransfer implements ExceptionCode, Lego {
                 //数据处理队列名称，必填
                 putPolicy.put("persistentPipeline", properQueue);
                 //数据处理完成结果通知地址
-    //            putPolicy.put("persistentNotifyUrl", "http://api.example.com/qiniu/pfop/notify");
+                putPolicy.put("persistentNotifyUrl", persistentUrl);
 
                 long expireSeconds = 3600;
                 upToken = auth.uploadToken(bucket, null, expireSeconds, putPolicy);
@@ -191,6 +206,8 @@ public class AudioTransfer implements ExceptionCode, Lego {
                 filePath = url+"/"+putRet.key;
             }
             output.setOutputValue(Output_Key_Target_File_Path,filePath);
+            output.setOutputValue(Output_Key_Target_Oss_File_Path,ossUrl+putRet.key);
+
             if(StringUtil.isValid(saveStorage)){
                 //如果saveStorage 为有值，就保存到storage表， 用于单独使用七牛上传
                 FileStorage fileStorage = new FileStorage();

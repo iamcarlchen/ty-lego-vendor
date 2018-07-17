@@ -38,6 +38,8 @@ public class OssUploadFile extends OssBase {
     private static final String Input_Key_File_Stream = "file_stream";
     private static final String Input_Key_File_Content_Type = "contentType";//文件类型
 
+    private static final String Input_Key_File_Serialize_Name = "file_serialize_name";//序列化的文件名 eg:xxx.jpg
+
 
     private static final long Lego_Error_No_File_Need_To_Upload = 300027L;
     private static final long Lego_Error_File_Stream_Error = 300028L;
@@ -56,6 +58,7 @@ public class OssUploadFile extends OssBase {
     public void execute(Input input, Output output) throws LegoException {
         //lego 处理逻辑
         String contentType = input.getInputValue(Input_Key_File_Content_Type);
+        String targetName = input.getInputValue(Input_Key_File_Serialize_Name);//目标文件名
         String bucketName = input.getInputValue(Input_Key_Oss_Bucket_Name);
         if (StringUtil.isInvalid(bucketName)) {
             throw new LegoException("OSS存储空间名称无效", ERROR_LEGO_OSS_Bucket_Name_Null);
@@ -84,7 +87,12 @@ public class OssUploadFile extends OssBase {
                     originalName = file.getOriginalFilename();
                     fileSize = file.getSize();
                     fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
-                    serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
+                    if(StringUtil.isInvalid(targetName)){
+                        serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
+                    }else{
+                        serializeName = targetName;
+                    }
+
                     if(StringUtil.isInvalid(contentType)){
                         contentType = file.getContentType();
                     }
@@ -95,8 +103,11 @@ public class OssUploadFile extends OssBase {
                     originalName = file.getName();
                     fileSize = file.length();
                     fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
-                    serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
-
+                    if(StringUtil.isInvalid(targetName)){
+                        serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
+                    }else{
+                        serializeName = targetName;
+                    }
                     if(StringUtil.isInvalid(contentType)){
                         Magic parser = new Magic() ;
                         MagicMatch match = parser.getMagicMatch(file,false);
