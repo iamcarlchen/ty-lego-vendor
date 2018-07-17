@@ -36,6 +36,7 @@ public class OssUploadFile extends OssBase {
     private static final Logger logger = Logger.getLogger(OssUploadFile.class);
 
     private static final String Input_Key_File_Stream = "file_stream";
+    private static final String Input_Key_File_Content_Type = "contentType";//文件类型
 
 
     private static final long Lego_Error_No_File_Need_To_Upload = 300027L;
@@ -54,6 +55,7 @@ public class OssUploadFile extends OssBase {
     @Override
     public void execute(Input input, Output output) throws LegoException {
         //lego 处理逻辑
+        String contentType = input.getInputValue(Input_Key_File_Content_Type);
         String bucketName = input.getInputValue(Input_Key_Oss_Bucket_Name);
         if (StringUtil.isInvalid(bucketName)) {
             throw new LegoException("OSS存储空间名称无效", ERROR_LEGO_OSS_Bucket_Name_Null);
@@ -76,7 +78,6 @@ public class OssUploadFile extends OssBase {
             long fileSize = 0;
             String fileType = "";
             String serializeName = "";
-            String contentType = "";
             try {
                 if (objectValue instanceof MultipartFile) {
                     MultipartFile file = (MultipartFile) objectValue;
@@ -84,7 +85,9 @@ public class OssUploadFile extends OssBase {
                     fileSize = file.getSize();
                     fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
                     serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
-                    contentType = file.getContentType();
+                    if(StringUtil.isInvalid(contentType)){
+                        contentType = file.getContentType();
+                    }
                     //上传文件
                     ossClient.putObject(new PutObjectRequest(bucketName, serializeName, file.getInputStream()));
                 }else{
@@ -94,9 +97,11 @@ public class OssUploadFile extends OssBase {
                     fileType = originalName.split("\\.")[originalName.split("\\.").length - 1];
                     serializeName = RandomGUIDUtil.getRawGUID() + "." + fileType;
 
-                    Magic parser = new Magic() ;
-                    MagicMatch match = parser.getMagicMatch(file,false);
-                    contentType = match.getMimeType();
+                    if(StringUtil.isInvalid(contentType)){
+                        Magic parser = new Magic() ;
+                        MagicMatch match = parser.getMagicMatch(file,false);
+                        contentType = match.getMimeType();
+                    }
                     //上传文件
                     ossClient.putObject(new PutObjectRequest(bucketName, serializeName, file));
                 }

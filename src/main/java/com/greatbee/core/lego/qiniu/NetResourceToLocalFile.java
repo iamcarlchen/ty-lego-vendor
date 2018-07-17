@@ -33,6 +33,8 @@ public class NetResourceToLocalFile implements ExceptionCode, Lego {
 
     private static final String Output_Key_Net_Resource_Stream = "net_file_stream";//网络文件流
 
+    private static final String Output_Key_Net_Resource_Content_Type = "contentType";//资源contentType
+
     @Override
     public void execute(Input input, Output output) throws LegoException {
         String resourceUrl = input.getInputValue(Input_Key_Net_Resource_Url);
@@ -48,12 +50,14 @@ public class NetResourceToLocalFile implements ExceptionCode, Lego {
             //如果文件名没有传，直接从header中获取，4是微信获取文件名的header方式
             if(StringUtil.isInvalid(fileName)){
                 fileName = uc.getHeaderField(4);
+                if(StringUtil.isInvalid(fileName)){
+                    throw new LegoException("资源地址无效,无法获取文件名",ERROR_LEGO_NET_RESOURCE_INVALIDATE);
+                }
+                fileName = URLDecoder.decode(fileName.substring(fileName.indexOf("filename=") + 9), "UTF-8");
+                fileName = fileName.replaceAll("\"", "");//去掉文件名前后的引号
             }
-            if(StringUtil.isInvalid(fileName)){
-                throw new LegoException("资源地址无效,无法获取文件名",ERROR_LEGO_NET_RESOURCE_INVALIDATE);
-            }
-            fileName = URLDecoder.decode(fileName.substring(fileName.indexOf("filename=") + 9), "UTF-8");
-            fileName = fileName.replaceAll("\"","");//去掉文件名前后的引号
+            String contentType = uc.getHeaderField("Content-Type");//获取contentType
+
             logger.info("[NetResourceToLocalFile] fileName="+fileName);
             BufferedInputStream in = new BufferedInputStream(uc.getInputStream());
             //先将微信媒体文件存到本地
@@ -76,6 +80,7 @@ public class NetResourceToLocalFile implements ExceptionCode, Lego {
             out.close();
 
             output.setOutputValue(Output_Key_Net_Resource_Stream,new File(filePath));
+            output.setOutputValue(Output_Key_Net_Resource_Content_Type,contentType);
 
         }  catch (IOException e) {
             e.printStackTrace();
