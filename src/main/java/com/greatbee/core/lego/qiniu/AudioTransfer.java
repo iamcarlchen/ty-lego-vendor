@@ -116,7 +116,10 @@ public class AudioTransfer implements ExceptionCode, Lego {
         Map params = _buildTplParams(input);
         String url = LegoUtil.transferInputValue(downloadUrl, params);//附带参数可能需要模板
         String ossDownloadUrl = input.getInputValue(Input_Key_File_Oss_Download_Url);
-        String ossUrl = LegoUtil.transferInputValue(ossDownloadUrl, params);//附带参数可能需要模板
+        String ossUrl = "";
+        if(StringUtil.isValid(ossDownloadUrl)){
+            ossUrl = LegoUtil.transferInputValue(ossDownloadUrl, params);//附带参数可能需要模板
+        }
 
         try {
             InputStream is = null;
@@ -203,7 +206,7 @@ public class AudioTransfer implements ExceptionCode, Lego {
             // 返回可以直接访问的文件地址 和文件名
             output.setOutputValue(Output_Key_Target_File_Name,putRet.key);
             String filePath = "";
-            if("JPEG".equalsIgnoreCase(targetType)||"PNG".equalsIgnoreCase(targetType)||"JPG".equalsIgnoreCase(targetType)){
+            if("JPEG".equalsIgnoreCase(fileType)||"PNG".equalsIgnoreCase(fileType)||"JPG".equalsIgnoreCase(fileType)){
                 //如果是图片格式文件，返回压缩后的图片地址地址  文件地址后加上 ?imageslim   七牛只支持这两种文件格式瘦身
                 filePath = url+"/"+putRet.key+"?imageslim";
             }else{
