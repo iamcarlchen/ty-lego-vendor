@@ -66,9 +66,9 @@ public class AudioTransfer implements ExceptionCode, Lego {
     private static final String Input_Key_Qiniu_Persistent_Url = "persistentUrl";//七牛处理完毕之后的回调接口
 
     //拼接上传或者查询，返回文件url，方便显示或者下载
-    private static final String Input_Key_File_Download_Url = "qiniu_download_url";
-    //oss下载地址
-    private static final String Input_Key_File_Oss_Download_Url = "oss_download_url";
+    private static final String Input_Key_File_Download_Url = "qiniu_download_url";//七牛的下载域名 + xxx.mp3
+
+    private static final String Input_Key_File_Oss_Download_Url = "oss_download_url";//oss下载域名 + xxx.mp3
 
     private static final String Input_Key_Qiniu_Format_String = "formatString";//七牛处理规格
 
@@ -79,6 +79,8 @@ public class AudioTransfer implements ExceptionCode, Lego {
     private static final String Output_Key_Target_File_Path = "filePath";//目标文件地址 ,如果是图片，返回压缩后的图片地址   七牛地址
 
     private static final String Output_Key_Target_Oss_File_Path = "ossfilePath";//oss目标下载文件
+
+    private static final String Output_Key_Target_Video_Thumbnail = "thumbnail";//视频缩略图地址
 
     @Autowired
     private TYDriver tyDriver;
@@ -181,6 +183,14 @@ public class AudioTransfer implements ExceptionCode, Lego {
                 String persistentOpfs = StringUtils.join(new String[]{
                         avthumbMp3Fop
                 }, ";");
+                if("mp4".equalsIgnoreCase(targetType)||"mov".equalsIgnoreCase(targetType)||"flv".equalsIgnoreCase(targetType)||"avi".equalsIgnoreCase(targetType)){
+                    //如果目标转码是 视频格式，就生成一张缩略图
+                    String saveJpgEntry = String.format("%s:%s.jpg", bucket,uuid);
+                    String vframeJpgFop = String.format("vframe/jpg/offset/1|saveas/%s", UrlSafeBase64.encodeToString(saveJpgEntry));
+                    persistentOpfs = StringUtils.join(new String[]{
+                            avthumbMp3Fop,vframeJpgFop
+                    }, ";");
+                }
 
                 putPolicy.put("persistentOps", persistentOpfs);
                 //数据处理队列名称，必填
@@ -213,6 +223,8 @@ public class AudioTransfer implements ExceptionCode, Lego {
                 filePath = url+"/"+putRet.key;
             }
             output.setOutputValue(Output_Key_Target_File_Path,filePath);
+            output.setOutputValue(Output_Key_Target_Video_Thumbnail,url+"/"+uuid+".jpg");//缩略图默认是jpg
+
             output.setOutputValue(Output_Key_Target_Oss_File_Path,ossUrl+putRet.key);
 
             if(StringUtil.isValid(saveStorage)){
