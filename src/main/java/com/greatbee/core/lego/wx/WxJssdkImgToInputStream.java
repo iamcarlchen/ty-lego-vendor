@@ -5,6 +5,7 @@ import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.wx.util.WxUtil;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,7 @@ public class WxJssdkImgToInputStream extends WxAuth{
         }
 
         try {
-            String accessToken = this.getAccessTokenString(appId, secret);
+            String accessToken = WxUtil.getAccessTokenString(appId, secret);
 
             String downloadUrl = "http://file.api.weixin.qq.com/cgi-bin/media/get?access_token="+accessToken+"&media_id="+mediaId;
 
