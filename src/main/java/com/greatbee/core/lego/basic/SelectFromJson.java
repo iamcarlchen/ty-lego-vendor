@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.greatbee.base.bean.Data;
 import com.greatbee.base.bean.DataList;
 import com.greatbee.base.util.CollectionUtil;
+import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.ExceptionCode;
 import com.greatbee.core.bean.constant.CT;
 import com.greatbee.core.bean.constant.IOFT;
@@ -32,6 +33,9 @@ public class SelectFromJson implements ExceptionCode, Lego {
 
     private static final String Input_Key_Index_JSON = "index_json";//需要查询的json数据，可以是json对象也可以是jsonString
 
+    private static final String Input_Key_Removal = "removal";//是否去重
+    private static final String Input_Key_Removal_Key = "removalKey";//去重key
+
     private static final String Output_Key_Result_Data_Object = "result_data";//返回的list 或 对象
 
     private static final long Lego_Error_Find_Json_Only_Two_Level = 300065L;
@@ -51,6 +55,8 @@ public class SelectFromJson implements ExceptionCode, Lego {
             output.setOutputValue(Output_Key_Result_Data_Object,obj);
             return;
         }
+        String removal = input.getInputValue(Input_Key_Removal);//是否去重
+        String removalKey = input.getInputValue(Input_Key_Removal_Key);//去重的key
 
         Object result = null;
         for(int i=0;i<conditions.size();i++){
@@ -69,6 +75,9 @@ public class SelectFromJson implements ExceptionCode, Lego {
                 if(result instanceof JSONArray){
                     obj = ((JSONArray) result).clone();
                     result = _buildJSONArray(key,ct,value, (JSONArray) obj);
+                    if(StringUtil.isValid(removal)){
+                        result = duplicateRemoval((JSONArray) result,removalKey);
+                    }
                 }else if(result instanceof JSONObject){
                     obj =  ((JSONObject) result).clone();
                     result = _buildJSONObject(key, ct, value, (JSONObject) obj);
@@ -87,6 +96,38 @@ public class SelectFromJson implements ExceptionCode, Lego {
             }
         }
 
+    }
+
+    /**
+     * 列表去重
+     * @param array
+     * @return
+     */
+    private JSONArray duplicateRemoval(JSONArray array,String removalKey){
+        if(array.size()<=0){
+            return array;
+        }
+        JSONArray result = new JSONArray();
+        for(int i=0;i<array.size();i++){
+            JSONObject item = array.getJSONObject(i);
+            if(item.containsKey(removalKey)){
+                String key = item.getString(removalKey);
+                boolean isHas = false;
+                for(int j=0;j<result.size();j++){
+                    if(key.equals(result.getJSONObject(j).getString(removalKey))){
+                        //说明已经存在了
+                        isHas =true;
+                        break;
+                    }
+                }
+                if(!isHas){
+                    result.add(item);
+                }
+            }else{
+                result.add(item);
+            }
+        }
+        return result;
     }
 
     /**
