@@ -272,7 +272,11 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
                             int columnCount = md.getColumnCount();   //获得列数
                             for (int i = 1; i <= columnCount; i++) {
                                 Object o = resultSet.getObject(i);
-                                data.put(md.getColumnName(i), o==null?"":o);
+                                String __key = md.getColumnLabel(i);
+                                if(StringUtil.isInvalid(__key)){
+                                    __key = md.getColumnName(i);
+                                }
+                                data.put(__key, o==null?"":o);
                             }
                         }
                     }.execute(rs, data);
