@@ -75,9 +75,9 @@ public class SelectFromJson implements ExceptionCode, Lego {
                 if(result instanceof JSONArray){
                     obj = ((JSONArray) result).clone();
                     result = _buildJSONArray(key,ct,value, (JSONArray) obj);
-                    if(StringUtil.isValid(removal)){
-                        result = duplicateRemoval((JSONArray) result,removalKey);
-                    }
+//                    if(StringUtil.isValid(removal)){
+//                        result = duplicateRemoval((JSONArray) result,removalKey);
+//                    }
                 }else if(result instanceof JSONObject){
                     obj =  ((JSONObject) result).clone();
                     result = _buildJSONObject(key, ct, value, (JSONObject) obj);
@@ -92,7 +92,11 @@ public class SelectFromJson implements ExceptionCode, Lego {
         if(CollectionUtil.isValid(ofs)){
             for(OutputField _of:ofs){
                 String fieldKey = _of.getFieldName();
-                _of.setFieldValue(buildOutputField(result,fieldKey));
+                Object outObj = buildOutputField(result,fieldKey);
+                if(outObj instanceof JSONArray && StringUtil.isValid(removal)){
+                    outObj = duplicateRemoval((JSONArray) outObj,removalKey);
+                }
+                _of.setFieldValue(outObj);
             }
         }
 
@@ -137,6 +141,10 @@ public class SelectFromJson implements ExceptionCode, Lego {
      * @return
      */
     private Object buildOutputField(Object result,String fieldKey){
+        if(Output_Key_Result_Data_Object.equalsIgnoreCase(fieldKey)){
+            //如果就是拿当前对象
+            return result;
+        }
         if(result instanceof JSONObject){
             return ((JSONObject) result).get(fieldKey);
         }else if(result instanceof JSONArray){
