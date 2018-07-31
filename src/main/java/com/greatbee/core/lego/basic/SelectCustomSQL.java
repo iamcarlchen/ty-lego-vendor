@@ -1,5 +1,6 @@
 package com.greatbee.core.lego.basic;
 
+import com.alibaba.fastjson.JSON;
 import com.greatbee.base.bean.DBException;
 import com.greatbee.base.bean.Data;
 import com.greatbee.base.bean.DataList;
@@ -241,6 +242,10 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
                         throw new DBException(e.getMessage(),e.getCode());
                     }
                     preparedStatement = connection.prepareStatement(psSqlTpl);
+                    try{
+                        logger.info("[SelectCustomSQL] psSQL="+psSqlTpl);
+                        logger.info("[SelectCustomSQL] params="+ JSON.toJSONString(params));
+                    }catch(Exception ee){}
                     for(int i=0;i<params.size();i++){
                         preparedStatement.setObject(i+1,params.get(i));
                     }
