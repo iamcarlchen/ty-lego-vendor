@@ -81,9 +81,7 @@ public class QiniuPersistentNotify implements ExceptionCode, Lego {
      */
     private Map _buildTplParams(Input input) throws LegoException {
         java.util.List ifs = input.getInputFields();
-        HashMap params = new HashMap();
-        params.put("request", LegoUtil.getParameterMap(input.getRequest()));
-        params.put("session", LegoUtil.getSessionAttributeMap(input.getRequest()));
+        Map<String,Object> params = LegoUtil.buildTPLParams(input.getRequest(),null,null,input);
         Iterator result = ifs.iterator();
         while(result.hasNext()) {
             InputField _if = (InputField)result.next();

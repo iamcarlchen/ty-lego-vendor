@@ -40,8 +40,6 @@ public abstract class OssBase implements ExceptionCode, Lego {
     protected static final String Input_Key_Oss_Bucket_Name = "bucketName";//oss  存储空间名字
     //拼接上传或者查询，返回文件url，方便显示或者下载
     protected static final String Input_Key_File_Download_Url = "oss_download_url";
-    //文件url
-    protected static final String Output_Key_File_Url = "file_url";
 
     /**
      * 创建OSS客户端
@@ -97,9 +95,7 @@ public abstract class OssBase implements ExceptionCode, Lego {
      */
     protected Map buildTplParams(Input input) throws LegoException {
         java.util.List ifs = input.getInputFields();
-        HashMap params = new HashMap();
-        params.put("request", LegoUtil.getParameterMap(input.getRequest()));
-        params.put("session", LegoUtil.getSessionAttributeMap(input.getRequest()));
+        Map<String,Object> params = LegoUtil.buildTPLParams(input.getRequest(),null,null,input);
         Iterator result = ifs.iterator();
         while(result.hasNext()) {
             InputField _if = (InputField)result.next();

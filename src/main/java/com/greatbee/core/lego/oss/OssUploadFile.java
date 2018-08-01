@@ -10,6 +10,7 @@ import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
 import com.greatbee.core.lego.util.LegoUtil;
+import com.greatbee.core.lego.util.StorageUtil;
 import com.greatbee.core.manager.TYDriver;
 import net.sf.jmimemagic.*;
 import org.apache.log4j.Logger;
@@ -43,13 +44,6 @@ public class OssUploadFile extends OssBase {
 
     private static final long Lego_Error_No_File_Need_To_Upload = 300027L;
     private static final long Lego_Error_File_Stream_Error = 300028L;
-
-    private static final String Output_Key_File_Serialize_name = "file_serialize_name";
-    private static final String Output_Key_File_Original_name = "file_original_name";
-    private static final String Output_Key_File_Size = "file_size";
-    private static final String Output_Key_File_Type = "file_type";
-    private static final String Output_Key_File_Content_Type = "file_content_type";
-    private static final String Output_Key_File_Storage = "file_storage";
 
     @Autowired
     private TYDriver tyDriver;
@@ -130,13 +124,6 @@ public class OssUploadFile extends OssBase {
                 throw new LegoException("文件流错误", Lego_Error_File_Stream_Error);
             }
 
-            output.setOutputValue(Output_Key_File_Original_name, originalName);
-            output.setOutputValue(Output_Key_File_Serialize_name, serializeName);
-            output.setOutputValue(Output_Key_File_Size, Long.valueOf(fileSize));
-            output.setOutputValue(Output_Key_File_Type, fileType);
-            output.setOutputValue(Output_Key_File_Content_Type, contentType);
-            output.setOutputValue(Output_Key_File_Url, url + serializeName);
-
             FileStorage fileStorage = new FileStorage();
             fileStorage.setContentType(contentType);
             fileStorage.setFileSize(Long.valueOf(fileSize));
@@ -147,14 +134,13 @@ public class OssUploadFile extends OssBase {
             fileStorage.setFileUrl(url + serializeName);
             fileStorage.setUploadType("oss");
             try {
-                this.tyDriver.getFileStorageManager().add(fileStorage);
+                StorageUtil.addFileStorage(fileStorage,output,tyDriver);
             } catch (DBException e) {
                 e.printStackTrace();
                 throw new LegoException(e.getMessage(), e.getCode());
             } finally {
                 this.closeClient(ossClient);
             }
-            output.setOutputValue(Output_Key_File_Storage, fileStorage);
             this.closeClient(ossClient);
         }
 
