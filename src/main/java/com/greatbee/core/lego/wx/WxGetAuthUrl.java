@@ -36,7 +36,7 @@ public class WxGetAuthUrl extends WxAuth{
 
     private static final String Output_Key_Wx_Auth_Url = "authUrl";//微信授权url
 
-    private static final int UN_WX_Login_Code = -401;//-401 表示 微信没有登录，直接跳转到微信授权登录界面,前台在接口调用的地方处理微信环境下-401跳转
+    private static final int UN_WX_Login_Code = -420;//-401 表示 微信没有登录，直接跳转到微信授权登录界面,前台在接口调用的地方处理微信环境下-401跳转
 
     private static final String WX_Login_Scope_Base = "snsapi_base";//静默授权 //snsapi_userinfo 用户确认授权
 
