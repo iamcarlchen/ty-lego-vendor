@@ -10,6 +10,7 @@ import com.greatbee.core.lego.Lego;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -30,10 +31,10 @@ public class CSVRead implements Lego {
     private static final String Output_Key_Headers = "headers";
     private static final String Output_Key_Data_List = "data_list";
 
-    public static void main(String args[]) throws LegoException {
-        CSVRead r = new CSVRead();
-        r.execute(null, null);
-    }
+//    public static void main(String args[]) throws LegoException {
+//        CSVRead r = new CSVRead();
+//        r.execute(null, null);
+//    }
 
     @Override
     public void execute(Input input, Output output) throws LegoException {
@@ -41,9 +42,15 @@ public class CSVRead implements Lego {
 
         Object fs = input.getInputObjectValue(Input_Key_CSV_FileStream);
 
-        if (fs != null && fs instanceof FileStream) {
+        if (fs != null) {
             try {
-                CsvReader reader = new CsvReader(((FileStream) fs).getInputStream(), ',', Charset.forName("UTF-8"));
+                InputStream is = null;
+                if(fs instanceof FileStream){
+                    is = ((FileStream) fs).getInputStream();
+                }else if(fs instanceof MultipartFile){
+                    is = ((MultipartFile) fs).getInputStream();
+                }
+                CsvReader reader = new CsvReader(is, ',', Charset.forName("UTF-8"));
 //                CsvReader reader = new CsvReader(new FileInputStream(new File("/Users/CarlChen/project/TY/io/demo.csv")),',',Charset.forName("UTF-8"));
 
                 List<String[]> headers = new ArrayList<String[]>();
