@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.greatbee.base.bean.Data;
 import com.greatbee.base.bean.DataList;
 import com.greatbee.base.util.CollectionUtil;
+import com.greatbee.base.util.DataUtil;
 import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.ExceptionCode;
 import com.greatbee.core.bean.constant.CT;
@@ -175,9 +176,14 @@ public class SelectFromJson implements ExceptionCode, Lego {
      * @return
      */
     private Boolean checkCondition(Object obj,String ct,Object value){
+        if(obj==null){
+            return false;
+        }
         if(CT.EQ.getName().equalsIgnoreCase(ct)){
             //条件是等于
-            if((obj instanceof Integer || obj instanceof Float || obj instanceof Double)&& obj == value){
+            if((obj instanceof Integer || obj instanceof Float || obj instanceof Double)&& Double.valueOf(String.valueOf(obj)) == Double.valueOf(String.valueOf(value))){
+                return true;
+            }else if(obj instanceof Boolean && ((Boolean) obj == DataUtil.getBoolean(String.valueOf(value),false))){
                 return true;
             }else if(obj instanceof String && obj.equals(value)){
                 return true;
