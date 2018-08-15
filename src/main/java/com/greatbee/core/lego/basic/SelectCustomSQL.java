@@ -151,6 +151,8 @@ public class SelectCustomSQL extends BaseTYJDBCTemplate implements ExceptionCode
             dataPage.setTotalRecords(count);
             responseData = dataPage;
         }
+        //加上序号字段
+        LegoUtil.a(responseData);
         output.setOutputValue(Output_Key_Data,responseData);
 
         //拉取所有的常用(common)输出配置
