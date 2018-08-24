@@ -6,6 +6,7 @@ import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.Lego;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.system.TYPPC;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +63,14 @@ public class NetResourceToLocalFile implements ExceptionCode, Lego {
             BufferedInputStream in = new BufferedInputStream(uc.getInputStream());
             //先将微信媒体文件存到本地
             String locaPath = NetResourceToLocalFile.class.getResource("/").getPath();
+            String tmpPath = TYPPC.d("upload.temp.dir");
+            if(StringUtil.isValid(tmpPath)){
+                File tmpFile = new File(tmpPath);
+                if(!tmpFile.getParentFile().exists()){
+                    tmpFile.getParentFile().mkdirs();
+                }
+                locaPath = tmpPath;
+            }
             String filePath = locaPath+fileName;
             logger.info("[NetResourceToLocalFile] filePath="+filePath);
             File file =  new File(filePath);

@@ -5,6 +5,7 @@ import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.system.TYPPC;
 import com.greatbee.core.lego.wx.util.WxUtil;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -63,6 +64,14 @@ public class WxJssdkImgToInputStream extends WxAuth{
             BufferedInputStream in = new BufferedInputStream(uc.getInputStream());
             //先将微信媒体文件存到本地
             String locaPath = WxJssdkImgToInputStream.class.getResource("/").getPath();
+            String tmpPath = TYPPC.d("upload.temp.dir");
+            if(StringUtil.isValid(tmpPath)){
+                File tmpFile = new File(tmpPath);
+                if(!tmpFile.getParentFile().exists()){
+                    tmpFile.getParentFile().mkdirs();
+                }
+                locaPath = tmpPath;
+            }
             String filePath = locaPath+fileName;
             logger.info("[wxJssdkImgToInputStream] filePath="+filePath);
             File file =  new File(filePath);
