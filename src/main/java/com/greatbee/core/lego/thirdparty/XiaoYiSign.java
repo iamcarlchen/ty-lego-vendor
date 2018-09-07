@@ -153,10 +153,10 @@ public class XiaoYiSign extends WxAuth{
 
 
     //计算Authorization
-    public static void main(String[] args) {
-
-        String sign = HmacUtil.hmacSha1("T1V5wNkLNFbj8LZZY36dQAzfZvFnQlhbAmYJA451CPJbGbP8hVirswTRRxabn5lD", "2018-09-06 20:15:00POST/thirdparty/createEnterprise");
-        System.out.println(sign);
+//    public static void main(String[] args) {
+//
+//        String sign = HmacUtil.hmacSha1("T1V5wNkLNFbj8LZZY36dQAzfZvFnQlhbAmYJA451CPJbGbP8hVirswTRRxabn5lD", "2018-09-06 20:15:00POST/thirdparty/createEnterprise");
+//        System.out.println(sign);
 
 //
 //        List<InputField> list = new ArrayList<>();
@@ -183,7 +183,7 @@ public class XiaoYiSign extends WxAuth{
 //        String enterpriseId = "9527";
 //        String sign = sign(appId,appSecret,enterpriseId,method,url,list);
 //        System.out.println("sign="+sign);
-    }
+//    }
 
 
 
