@@ -481,5 +481,29 @@ public class WxUtil {
         return null;
     }
 
+    /**
+     * description: 解析微信通知xml
+     *
+     * @param xml
+     * @return
+     */
+    public static Map parseXmlToList(String xml) {
+        try {
+            Document document = DocumentHelper.parseText(xml);
+            //获取文档的根节点
+            Element root = document.getRootElement();
+            Map<String, String> map = new HashMap<String, String>();
+            //对某节点下的所有子节点进行遍历.
+            for (Iterator it = root.elementIterator(); it.hasNext(); ) {
+                Element element = (Element) it.next();
+                map.put(element.getName(), element.getText());
+            }
+            return map;
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 }

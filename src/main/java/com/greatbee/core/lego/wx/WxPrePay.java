@@ -1,11 +1,16 @@
 package com.greatbee.core.lego.wx;
 
+import com.alibaba.fastjson.JSONObject;
 import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.wx.util.WxUtil;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * wxPrePay
@@ -88,11 +93,39 @@ public class WxPrePay extends WxAuth{
             throw new LegoException("微信公众号密钥必填",ERROR_LEGO_WX_PAY_Api_Secret_Error);
         }
 
-
+        /**
+         * params:{
+         *     appid:'',
+         *     serialNumber:'订单编号',
+         *     mch_id:'商户id',
+         *     notify_url:'通知地址',
+         *     openid:'用户openid',
+         *     total_fee:'总金额，单位元',
+         *     trade_type:'交易类型，默认JSAPI',
+         *     wx_api_secret:'微信api密钥',
+         *     body:'商品描述'//没有就显示订单号
+         * }
+         */
+        Map<String,Object> map = new HashMap<>();
+        map.put("appid",appid);
+        map.put("serialNumber",serialNumber);
+        map.put("mch_id",mchId);
+        map.put("notify_url",notifyUrl);
+        map.put("openid",openId);
+        map.put("total_fee",totalFee);
+        map.put("trade_type","JSAPI");
+        map.put("wx_api_secret",apiSecret);
+        map.put("body",body);
+        JSONObject resJson = null;
+        try {
+            resJson = WxUtil.weixinOrder(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //返回js调起支付需要的参数
+        output.setOutputValue(Output_Key_WX_Pay_Param,resJson);
 
     }
-
-
 
 
 
