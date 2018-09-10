@@ -7,7 +7,7 @@
     <groupId>greatbee</groupId>
     <artifactId>ty-lego-vendor</artifactId>
 
-    <version>1.0.35</version>
+    <version>1.0.36</version>
 
 
     <name>ty-lego-vendor</name>
@@ -118,7 +118,28 @@
             <version>5.5.10</version>
         </dependency>
 
-
+        <!--http-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.9</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.2</version>
+        </dependency>
 
 
 

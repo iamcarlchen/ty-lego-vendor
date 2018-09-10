@@ -1,5 +1,6 @@
 package com.greatbee.core.lego.wx.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.greatbee.base.bean.DBException;
@@ -186,6 +187,36 @@ public class WxUtil {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 拉取公众号的用户列表  openId列表
+     * ["OPENID1","OPENID2"...]
+     * @param appId
+     * @param appSecret
+     * @return
+     */
+    public static JSONArray getWxUserList(String appId,String appSecret) throws DBException {
+        //从头开始拉取公众号的用户列表，返回openid
+        String url = WX_Open_Api_Host + "/cgi-bin/user/get?access_token=" + getAccessTokenString(appId,appSecret)+"&next_openid=";
+        //get ticket
+        String httpResponse = HttpClientUtil.get(url, null).getResponseBody();
+        logger.info(httpResponse);
+        if (StringUtil.isInvalid(httpResponse)) {
+            logger.error("输出jsapi：" +"[getWxUserList][error] httpResponse is invalid!");
+        }
+        JSONObject jsonObject = JSONObject.parseObject(httpResponse);
+        if (jsonObject.containsKey("data")) {
+            JSONObject data = jsonObject.getJSONObject("data");
+            if(data.containsKey("openid")){
+                JSONArray openIds = data.getJSONArray("openid");
+                return openIds;
+            }
+        } else {
+            logger.error("[SimpleWxEnterpriseManager][_getTicket][error] httpResponse is invalid!");
+            return null;
+        }
+        return null;
     }
 
 
