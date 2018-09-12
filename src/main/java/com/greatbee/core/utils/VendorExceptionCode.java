@@ -15,5 +15,10 @@ public class VendorExceptionCode {
     public static final long Lego_Error_WX_Upload_Error = 300201L;
     public static final long Lego_Error_WX_Push_Error = 300202L;
 
+    //微信小程序
+    public static final long Lego_Error_WX_Mp_Appid_Null = 300203L;
+    public static final long Lego_Error_WX_Mp_Appsecret_Null = 300203L;
+    public static final long Lego_Error_WX_Mp_Generate_Error = 300204L;
+
 
 }
