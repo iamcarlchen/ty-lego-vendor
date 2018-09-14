@@ -1,10 +1,12 @@
 package com.greatbee.core.lego.wx;
 
 import com.greatbee.base.bean.DBException;
+import com.greatbee.base.util.DataUtil;
 import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.wx.util.WxMpUtil;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +22,15 @@ import org.springframework.stereotype.Component;
 public class WxGetOpenId extends WxAuth{
     private static final Logger logger = Logger.getLogger(WxGetOpenId.class);
 
+    private static final String Input_Key_Wx_Is_Miniprogram = "isMp";//是否是小程序
+
     private static final String Output_Key_WX_Open_Id = "openId";//返回微信openId
 
     @Override
     public void execute(Input input, Output output) throws LegoException {
         //lego 处理逻辑
+
+        boolean isMp = DataUtil.getBoolean(input.getInputValue(Input_Key_Wx_Is_Miniprogram),false);
         String code = input.getRequest().getParameter("code");
 //        String state = input.getRequest().getParameter("state");
         logger.info("[wxGetOpenId] code = "+code);
@@ -37,7 +43,12 @@ public class WxGetOpenId extends WxAuth{
 
         String openID = null;
         try {
-            openID = this.getOpenId(code,appId,secret);
+            if(isMp){
+                //是小程序
+                openID = WxMpUtil.getMpOpenId(appId,secret,code);
+            }else{
+                openID = this.getOpenId(code,appId,secret);
+            }
             logger.info("[wxGetOpenId] oepnID=" + openID);
         } catch (DBException e) {
             e.printStackTrace();

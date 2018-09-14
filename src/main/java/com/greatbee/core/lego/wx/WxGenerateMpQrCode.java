@@ -6,7 +6,7 @@ import com.greatbee.core.bean.view.FileStream;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
-import com.greatbee.core.lego.wx.util.WxUtil;
+import com.greatbee.core.lego.wx.util.WxMpUtil;
 import com.greatbee.core.utils.VendorExceptionCode;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -55,27 +55,7 @@ public class WxGenerateMpQrCode extends WxAuth {
         }
 
         //获取微信小程序 二维码图片流
-        InputStream is = WxUtil.getMiniQrCode(appId, appSecret, scene, page, hyaline);
-
-//        String tmpPath = VendorUtil.getTmpPath();
-//        try {
-//            //保存到临时目录
-//            File targetFile = new File(tmpPath);
-//            if(!targetFile.exists()){
-//                targetFile.mkdirs();
-//            }
-//            FileOutputStream out = null;
-//            out = new FileOutputStream(tmpPath+"/test.png");
-//            byte[] buffer = new byte[8192];
-//            int bytesRead = 0;
-//            while((bytesRead = is.read(buffer, 0, 8192)) != -1) {
-//                out.write(buffer, 0, bytesRead);
-//            }
-//            out.flush();
-//            out.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        InputStream is = WxMpUtil.getMiniQrCode(appId, appSecret, scene, page, hyaline);
 
         //返回给客户端输出
         FileStream fileStream = new FileStream(is);
