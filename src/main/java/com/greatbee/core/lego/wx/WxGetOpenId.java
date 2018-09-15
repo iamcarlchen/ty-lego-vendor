@@ -26,6 +26,8 @@ public class WxGetOpenId extends WxAuth{
 
     private static final String Output_Key_WX_Open_Id = "openId";//返回微信openId
 
+    private static final String Output_Key_Session_Id = "si";//返回sessionId，因为小程序每次请求的session都不同，前端需要手动设置sessionId  安全起见，字段名就简化
+
     @Override
     public void execute(Input input, Output output) throws LegoException {
         //lego 处理逻辑
@@ -55,6 +57,7 @@ public class WxGetOpenId extends WxAuth{
             throw new LegoException(e.getMessage(),e.getCode());
         }
         output.setOutputValue(Output_Key_WX_Open_Id,openID);
+        output.setOutputValue(Output_Key_Session_Id,input.getRequest().getSession().getId());
     }
 
 
