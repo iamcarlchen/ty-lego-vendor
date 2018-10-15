@@ -135,6 +135,7 @@ public class SynWeidianGoodsToLocal extends BaseRead implements ExceptionCode, L
         String response = WDUtil.weidianGetProductPage(appId, appSecret, page_num, page_size, 1);
         logger.info("weidianGetItems : " + response);
         JSONObject res = JSON.parseObject(response);
+        String goodsKey = _getInputField(input, Input_Key_Weidian_Product_Itemid).getAlias();//产品的唯一标识  管理后台的字段名
         boolean synContinue = false;
         if(res.containsKey("status") && res.getJSONObject("status").getInteger("status_code")==0){
             //成功请求
@@ -208,7 +209,20 @@ public class SynWeidianGoodsToLocal extends BaseRead implements ExceptionCode, L
                                 }
                             }
                             try {
-                                dataManager.update(oi, updateFieldsList, LegoUtil.buildCondition(input));
+                                Input conditionInput = new Input(input.getRequest(),input.getResponse());
+                                List<InputField> conditionIfs = new ArrayList<>();
+                                InputField conditionIf = new InputField();
+                                conditionIf.setCt(CT.EQ.getName());
+                                conditionIf.setFieldName(goodsKey);
+                                conditionIf.setAlias(goodsKey);
+                                conditionIf.setFieldValue(itemId);
+                                conditionIf.setDt(DT.String.getType());
+                                conditionIf.setIft(IOFT.Condition.getType());
+
+                                conditionIfs.add(conditionIf);
+                                conditionInput.setInputFields(conditionIfs);
+
+                                dataManager.update(oi, updateFieldsList, LegoUtil.buildCondition(conditionInput));
                             } catch (DBException e) {
                                 e.printStackTrace();
                                 break;
