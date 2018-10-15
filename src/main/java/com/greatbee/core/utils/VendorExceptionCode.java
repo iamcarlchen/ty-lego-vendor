@@ -25,6 +25,7 @@ public class VendorExceptionCode {
     public static final long Lego_Error_Weidian_Post_Error = 300302L;
     public static final long Lego_Error_Weidian_Auth_Error = 300303L;
     public static final long Lego_Error_Weidian_No_Product_Need_Update = 300304L;
+    public static final long Lego_Error_Auto_Increment_FieldName_Null = 300305L;
 
 
 }
