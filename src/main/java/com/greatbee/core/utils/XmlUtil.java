@@ -1,6 +1,9 @@
 package com.greatbee.core.utils;
 
+import com.greatbee.core.lego.LegoException;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
 import java.util.*;
@@ -17,6 +20,22 @@ public class XmlUtil {
 
     private static String XML_TAG = "<?xml version='1.0' encoding='UTF-8'?>";
 
+    /**
+     * xml 转 map
+     * @param xmlStr
+     * @return
+     * @throws LegoException
+     */
+    public static Map<String,Object> xml2Map(String xmlStr) throws LegoException {
+        Document doc = null;
+        try {
+            doc = DocumentHelper.parseText(xmlStr);
+        } catch (DocumentException e) {
+            e.printStackTrace();
+            throw new LegoException("xml字符串格式错误",VendorExceptionCode.Lego_Error_Xml_String_Formatting_Error);
+        }
+        return  Dom2Map(doc);
+    }
 
     public static Map<String, Object> Dom2Map(Document doc) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -90,7 +109,7 @@ public class XmlUtil {
      * @param map
      * @return
      */
-    public static String mapToXml(Map map) {
+    public static String map2Xml(Map map) {
         System.out.println("将Map转成Xml, Map：" + map.toString());
         StringBuffer sb = new StringBuffer();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>");
@@ -174,20 +193,21 @@ public class XmlUtil {
         return true;
     }
 
-//    public static void main(String[] args) throws Exception {
-//        String message = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> " +
-//                "<req>\n" +
-//                "   <CustomerCode>客户编码</CustomerCode>\n" +
-//                "   <CouponNo>石化兑换券Id</CouponNo>\n" +
-//                "   <s>123</s>\n" +
-//                "   <bb>11</bb>\n" +
-//                "</req>";
-//
-//        Document doc = DocumentHelper.parseText(message);
-//        Map obj = Dom2Map(doc);
-//        System.out.println(obj);
-//        String e = mapToXml(obj);
-//        System.out.println(e);
-//    }
+
+    public static void main(String[] args) throws Exception {
+        String message = "<?xml version=\"1.0\" encoding=\"utf-8\" ?> " +
+                "<req>\n" +
+                "   <CustomerCode>客户编码</CustomerCode>\n" +
+                "   <CouponNo>石化兑换券Id</CouponNo>\n" +
+                "   <s>123</s>\n" +
+                "   <bb>11</bb>\n" +
+                "</req>";
+        String str = "<?xml version=\"1.0\" encoding=\"utf-8\"?><res><FlowNo>20181024162201</FlowNo><RetCode>M1</RetCode><RetMsg>客户信息不存在</RetMsg></res>";
+
+        Map obj = xml2Map(str);
+        System.out.println(obj);
+        String e = map2Xml(obj);
+        System.out.println(e);
+    }
 
 }

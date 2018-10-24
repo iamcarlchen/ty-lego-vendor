@@ -27,6 +27,9 @@ public class VendorExceptionCode {
     public static final long Lego_Error_Weidian_No_Product_Need_Update = 300304L;
     public static final long Lego_Error_Auto_Increment_FieldName_Null = 300305L;
     public static final long Lego_Error_Web_Service_Config_Param_Null = 300306L;
+    public static final long Lego_Error_Xml_String_Formatting_Error = 300307L;
+    public static final long Lego_Error_Xml_String_Null = 300308L;
+    public static final long Lego_Error_Xml_Data_Null = 300309L;
 
 
 }
