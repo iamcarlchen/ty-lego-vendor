@@ -1,5 +1,6 @@
 package com.greatbee.core.utils;
 
+import com.greatbee.base.bean.Data;
 import com.greatbee.core.lego.LegoException;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -103,6 +104,7 @@ public class XmlUtil {
         return map;
     }
 
+
     /**
      * Map 转 XML
      *
@@ -110,11 +112,21 @@ public class XmlUtil {
      * @return
      */
     public static String map2Xml(Map map) {
+        return map2Xml(map,"root");
+    }
+
+    /**
+     * 定义 map转xml的根元素名  不传是root
+     * @param map
+     * @param root
+     * @return
+     */
+    public static String map2Xml(Map map,String root){
         System.out.println("将Map转成Xml, Map：" + map.toString());
         StringBuffer sb = new StringBuffer();
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><root>");
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><"+root+">");
         mapToXml(map, sb);
-        sb.append("</root>");
+        sb.append("</" + root +">");
         System.out.println("将Map转成Xml, Xml：" + sb.toString());
         return sb.toString();
     }
@@ -208,6 +220,13 @@ public class XmlUtil {
         System.out.println(obj);
         String e = map2Xml(obj);
         System.out.println(e);
+
+        Data data = new Data();
+        data.put("CustomerCode","客户编码");
+        data.put("CouponNo","石化兑换券Id");
+        String result = map2Xml(data,"req");
+        System.out.println("result= "+result);
+
     }
 
 }
