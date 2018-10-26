@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -127,8 +128,8 @@ public class FyWsInvoke implements ExceptionCode, Lego{
 
         if(StringUtil.isInvalid(resSignKey)){
             //接口报错了
-            Data resMap = (Data) XmlUtil.xml2Map(resData);
-            throw new LegoException("错误码:"+resMap.getString("RetCode")+";流水号:"+resMap.getString("FlowNo")+";错误信息:"+resMap.getString("RetMsg"),VendorExceptionCode.Lego_Error_Fy_Web_Service_Error);
+            Map<String,Object> resMap = XmlUtil.xml2Map(resData);
+            throw new LegoException("错误码:"+resMap.get("RetCode")+";流水号:"+resMap.get("FlowNo")+";错误信息:"+resMap.get("RetMsg"),VendorExceptionCode.Lego_Error_Fy_Web_Service_Error);
         }
 
         //解密后的明文 xml文件
@@ -147,7 +148,7 @@ public class FyWsInvoke implements ExceptionCode, Lego{
         }
 
         //明文xml文件转成Data对象
-        Data resMap = (Data) XmlUtil.xml2Map(resXml);
+        Map resMap = XmlUtil.xml2Map(resXml);
 
         output.setOutputValue(Output_Key_Res_Data,resMap);
 
