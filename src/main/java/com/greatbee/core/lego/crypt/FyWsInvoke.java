@@ -25,14 +25,14 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.UUID;
 
 /**
- * FyEnCrypt fy 接口加密
+ * FyWsInvoke fy 接口加密
  *
  * @author xiaobc
  * @date 18/6/21
  */
-@Component("fyEnCrypt")
-public class FyEnCrypt implements ExceptionCode, Lego{
-    private static final Logger logger = Logger.getLogger(FyEnCrypt.class);
+@Component("fyWsInvoke")
+public class FyWsInvoke implements ExceptionCode, Lego{
+    private static final Logger logger = Logger.getLogger(FyWsInvoke.class);
 
     private static final String Sign_Key="SignKey";
     private static final String Fy_Data = "Data";
@@ -83,7 +83,7 @@ public class FyEnCrypt implements ExceptionCode, Lego{
 
         //将data对象转成xml字符串
         String reqXml =  XmlUtil.map2Xml(data,"req");//根节点名称为 req
-        logger.info("[fyEnCrypt] reqXml = " + reqXml);
+        logger.info("[FyWsInvoke] reqXml = " + reqXml);
 
         //生成动态3des 秘钥
         String dynamicDesKey = buildDynamic3Des();
