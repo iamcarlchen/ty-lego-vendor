@@ -431,6 +431,17 @@ public class CryptUtil {
      * @throws NoSuchAlgorithmException
      */
     public static void main(String[] args) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        String s = "hello word";
+
+        String desKey = "RZ_xKrC2ST(&SfpA";
+        //3des 加解密
+        String cryptStr = encode3Des(desKey,s);
+        System.out.println("3des 密文："+cryptStr);
+        String str = decode3Des(desKey,cryptStr);
+        System.out.println("3des 明文: "+str);
+
+        System.out.println("===========================");
+
         Map keys = createKeys(2048);
 //        String publicKey = (String) keys.get("publicKey");
 //        String privateKey = (String) keys.get("privateKey");
@@ -446,17 +457,20 @@ public class CryptUtil {
         System.out.println("exponent=" + pk.getPublicExponent());
 
         //        测试加解密
-        String s = "hello word";
+
         String pass = publicEncrypt(s, getPublicKey(publicKey));
         System.out.println("pass="+pass);
         System.out.println(privateDecrypt(pass, getPrivateKey(privateKey)));
 
+        //java版秘钥转c#
         String netPk = getRSAPublicKeyAsNetFormat(Base64.decodeBase64(publicKey));//！！！！！！！！转成c# 要用appache的base64
         System.out.println("netPk=" + netPk);
 
+        //c#版转java秘钥
         RSAPublicKey pk2 = (RSAPublicKey) decodePublicKeyFromXml(netPk);
         String pass2 = publicEncrypt(s, pk2);
         System.out.println("pass2="+pass2);
+        //私钥解密
         System.out.println(privateDecrypt(pass2, getPrivateKey(privateKey)));
 
         System.out.println("===========================");

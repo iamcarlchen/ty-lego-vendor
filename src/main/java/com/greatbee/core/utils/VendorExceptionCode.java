@@ -30,6 +30,12 @@ public class VendorExceptionCode {
     public static final long Lego_Error_Xml_String_Formatting_Error = 300307L;
     public static final long Lego_Error_Xml_String_Null = 300308L;
     public static final long Lego_Error_Xml_Data_Null = 300309L;
+    public static final long Lego_Error_Fy_Static_3DES_Null = 300310L;
+    public static final long Lego_Error_Fy_RSA_Public_Key_Null = 300311L;
+    public static final long Lego_Error_Fy_Customer_Code_Null = 300312L;
+    public static final long Lego_Error_Fy_Customer_RSA_Private_Key_Null = 300313L;
+    public static final long Lego_Error_Fy_Web_Service_Error = 300314L;
+    public static final long Lego_Error_Fy_RSA_Key_Error = 300315L;
 
 
 }
