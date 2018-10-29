@@ -37,7 +37,7 @@ public class WsUtil {
             call2.setReturnType(new QName("http://www.w3.org/2001/XMLSchema", "string"));//设置返回参数
             call2.setOperationName(new QName(targetNamespace, method));//设置函数名
             call2.setSOAPActionURI(soapAction);//设置URI
-            call2.addParameter(new QName(targetNamespace, "requestXML"), XMLType.XSD_STRING, ParameterMode.IN);  // 这里设置对应参数名称
+            call2.addParameter(new QName(targetNamespace, getWebParamName(method)), XMLType.XSD_STRING, ParameterMode.IN);  // 这里设置对应参数名称
             String retVal2 = (String) call2.invoke(new Object[] { xmlData });  //调用并带上参数数据
             System.out.println("[invokeWsdl] result = "+retVal2);
             return retVal2;
@@ -48,10 +48,36 @@ public class WsUtil {
         return null;
     }
 
+    /**
+     * 获取 web service 参数名
+     * @param method
+     * @return
+     */
+    private static String getWebParamName(String method){
+        switch(method){
+            case "PrePayBalanceQuery":
+                return "requestJson";
+            case "SubMchQuery":
+                return "requestJson";
+            case "CancelEOCoupon":
+                return "requestJson";
+            case "CouponPurchase":
+                return "requestXml";
+            case "OrderQuery":
+                return "requestXml";
+            case "GetCouponTypeList":
+                return "requestXml";
+            case "CouponQuery":
+                return "requestXml";
+            default:
+                return "requestXml";
+        }
+    }
+
 
     //    测试
     public static void main(String[] args) {
-        String encodeParams = "{\"SignKey\":\"hXyRG9Qp2YtNANnthUb2XNvp9hvG+Lvf4Y9Y12EEZwzkIEbz7GScu99u59i8tJEZ7f4YeQ nPGvMB8aW7OH+KqPpwgihXyciWhrhJX/o2qKA1BZeSXcZ+HwWqzLTOVKrc1uyepddZ1198+kL3B5I aF0H6aEvqRhJrtC7pKAU9HDA=\",\"Data\":\"t9tG8IfiymMC9NpKxYGUneyRyZz/2b+XiCkPlkPNW+HruF JAwWbMPGQdz7uq44YoPJkaHUJiKs0uC3vhpBMFQsJsAGr/ws1yKTMaC+mLIP7S5Hv78rGUQkx8ld/ It+ml34gisZc990dmMa7UY3AtawYoiHqBtpNMhI3cjOPWUvNTWhg4hml1JOg8BIoeeL4WePlIPcyb8 +T/MqN93szwHfpDdFN6Mrqreb8fGLUWi8hihI6Q7Da+1hFyKQPGN/48rfvdghhJWqv8K+OH+WVeb uN5/cYCeK9LEGxpDgCvthI=\",\"CustomerCode\":\"0010010000\"}";
+        String encodeParams = "{\"SignKey\":\"DlnoLEynWM+tfe2pRZ/Ta7e7RRf98oIyTU2JXBnIJOeBkez0oDB7tuGwBwI1dwM10v/inrkVoRp/sUPjEZsRlD9YfIM+qv1NJ7tYbTUMmdF7tUD4h/WlUekk3fFF8fZKaGaNujx6Q1bsSSCnwzJgRHPNlokjYK7x7IowHfk9g5k=\",\"Data\":\"ALwm6rXJRlyB7HMKyAFNaDmRjtPb4II1pQ0Yw1hqorCx7FCpwJKemfErlvBEGM6HPb+G37DvbzvOL8TkBtTMkJXj+nfGKsmVY0OIXdoscX+z/KNJqURp/Y5ejECnnISnT559BIOEHti66rnT88pHbNIBelcKrwIIlfYITrQ+zzaXPE3twDZ3kQ==\",\"CustomerCode\":\"0010000010\"}";
 
         String url = "http://61.140.21.164:65501/GDTest/EOPartnerService.svc?wsdl" ;
         String xmlData= encodeParams;
@@ -62,8 +88,8 @@ public class WsUtil {
             call2.setTargetEndpointAddress(url);
             call2.setUseSOAPAction(true);
             call2.setReturnType(new QName("http://www.w3.org/2001/XMLSchema", "string"));//设置返回参数
-            call2.setOperationName(new QName("http://tempuri.org/", "CouponQuery"));//设置函数名
-            call2.setSOAPActionURI("http://tempuri.org/IEOPartnerService/CouponQuery");//设置URI
+            call2.setOperationName(new QName("http://tempuri.org/", "PrePayBalanceQuery"));//设置函数名
+            call2.setSOAPActionURI("http://tempuri.org/IEOPartnerService/PrePayBalanceQuery");//设置URI
             call2.addParameter(new QName("http://tempuri.org/", "requestXML"), XMLType.XSD_STRING, ParameterMode.IN);  // 这里设置对应参数名称
             String retVal2 = (String) call2.invoke(new Object[] { xmlData });  //调用并带上参数数据
             System.out.println(retVal2);

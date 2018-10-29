@@ -12,16 +12,20 @@ import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.Lego;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
-import com.greatbee.core.utils.CryptUtil;
 import com.greatbee.core.utils.VendorExceptionCode;
 import com.greatbee.core.utils.WsUtil;
 import com.greatbee.core.utils.XmlUtil;
+import com.greatbee.core.utils.fyCrypt.RsaUtilExt;
+import com.greatbee.core.utils.fyCrypt.ThreeDES;
 import org.apache.log4j.Logger;
+import org.dom4j.DocumentException;
 import org.springframework.stereotype.Component;
 
+import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPublicKey;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -89,34 +93,44 @@ public class FyWsInvoke implements ExceptionCode, Lego{
         //生成动态3des 秘钥
         String dynamicDesKey = buildDynamic3Des();
         //加密动态3des秘钥 生成 signKey
-        RSAPublicKey rsaPk = null;
+        PublicKey rsaPk = null;
         if(rsaPublicKey.contains("<RSAKeyValue>")){
-            //.net格式 秘钥
-            rsaPk = (RSAPublicKey) CryptUtil.decodePublicKeyFromXml(rsaPublicKey);
-        }else{
+            HashMap<String,String> pmap = null;
             try {
-                rsaPk = CryptUtil.getPublicKey(rsaPublicKey);
-            } catch (NoSuchAlgorithmException e) {
+                pmap = RsaUtilExt.rsaParameters(rsaPublicKey);
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
                 logger.error(e.getMessage());
                 throw new LegoException("秘钥获取失败",VendorExceptionCode.Lego_Error_Fy_RSA_Key_Error);
-            } catch (InvalidKeySpecException e) {
+            } catch (DocumentException e) {
                 e.printStackTrace();
                 logger.error(e.getMessage());
                 throw new LegoException("秘钥获取失败",VendorExceptionCode.Lego_Error_Fy_RSA_Key_Error);
             }
+            rsaPk = RsaUtilExt.getPublicKey(pmap.get("mudulus"), pmap.get("exponent"));
+        }else{
+            logger.error("公钥设置错误");
+            throw new LegoException("秘钥获取失败",VendorExceptionCode.Lego_Error_Fy_RSA_Key_Error);
         }
-        String signKey = CryptUtil.publicEncrypt(dynamicDesKey, rsaPk);
-
+        String signKey = null;
+        try {
+            signKey = RsaUtilExt.encodeBase64(RsaUtilExt.encryptByPublicKey(dynamicDesKey.getBytes("UTF-8"), RsaUtilExt.encodeBase64(rsaPk.getEncoded())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new LegoException("RSA加密失败",VendorExceptionCode.Lego_Error_Fy_RSA_Key_Error);
+        }
         //Data 数据加密  先静态3des加密，再用动态3des加密
-        String ciphertext = CryptUtil.encode3Des(dynamicDesKey,CryptUtil.encode3Des(static3DesKey,reqXml));
+        String staticCiphertext = ThreeDES.encryption(static3DesKey, reqXml);
+        String ciphertext = ThreeDES.encryption(dynamicDesKey, staticCiphertext);
 
         //组装请求的机密json
         Data req = new Data();
         req.put(Sign_Key,signKey);
         req.put(Fy_Data,ciphertext);
-        req.put("CustomerCode",customerCode);
+        req.put("CustomerCode", customerCode);
 
+        logger.info("wsdl接口请求数据-动态16位3des秘钥：" + dynamicDesKey);
+        logger.info("wsdl接口请求数据：" + JSON.toJSONString(req));
         //发送请求
         String resStr = WsUtil.invokeWsdl(wsdlUrl, JSON.toJSONString(req),targetNamespace,soapAction,wsdlMethod);
         logger.info("wsdl接口请求返回数据："+resStr);
@@ -135,8 +149,13 @@ public class FyWsInvoke implements ExceptionCode, Lego{
         //解密后的明文 xml文件
         String resXml = null;
         try {
-            //先用rsa私钥取出动态3des秘钥， 再用取出的动态3des秘钥解密， 再用静态的3des秘钥解密
-            resXml = CryptUtil.privateDecrypt(resSignKey, CryptUtil.getPrivateKey(myRsaPrivateKey));//私钥只支持java版的
+            //先用rsa私钥取出动态3des秘钥，
+//            resXml = CryptUtil.privateDecrypt(resSignKey, CryptUtil.getPrivateKey(myRsaPrivateKey));//私钥只支持java版的
+            String res_signKey = new String(RsaUtilExt.decryptByPrivateKey(RsaUtilExt.decodeBase64(resSignKey), myRsaPrivateKey));//私钥只支持java版的
+
+            //解密Data：用取出的动态3des秘钥解密， 再用静态的3des秘钥解密
+            String dynamicRes = ThreeDES.decryption(res_signKey, resData);
+            resXml = ThreeDES.decryption(static3DesKey, dynamicRes);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             logger.error(e.getMessage());
@@ -144,6 +163,9 @@ public class FyWsInvoke implements ExceptionCode, Lego{
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
             logger.error(e.getMessage());
+            throw new LegoException("秘钥获取失败",VendorExceptionCode.Lego_Error_Fy_RSA_Key_Error);
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new LegoException("秘钥获取失败",VendorExceptionCode.Lego_Error_Fy_RSA_Key_Error);
         }
 

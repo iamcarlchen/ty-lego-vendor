@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class XmlUtil {
 
-    private static String XML_TAG = "<?xml version='1.0' encoding='UTF-8'?>";
+    private static String XML_TAG = "<?xml version='1.0' encoding='utf-8'?>";
 
     /**
      * xml 转 map
@@ -124,7 +124,7 @@ public class XmlUtil {
     public static String map2Xml(Map map,String root){
         System.out.println("将Map转成Xml, Map：" + map.toString());
         StringBuffer sb = new StringBuffer();
-        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><"+root+">");
+        sb.append("<?xml version=\"1.0\" encoding=\"utf-8\"?><"+root+">");
         mapToXml(map, sb);
         sb.append("</" + root +">");
         System.out.println("将Map转成Xml, Xml：" + sb.toString());
