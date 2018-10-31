@@ -36,6 +36,8 @@ public class VendorExceptionCode {
     public static final long Lego_Error_Fy_Customer_RSA_Private_Key_Null = 300313L;
     public static final long Lego_Error_Fy_Web_Service_Error = 300314L;
     public static final long Lego_Error_Fy_RSA_Key_Error = 300315L;
+    public static final long Lego_Error_Calculate_Tpl_Null = 300316L;
+    public static final long Lego_Error_Calculate_Error = 300317L;
 
 
 }
