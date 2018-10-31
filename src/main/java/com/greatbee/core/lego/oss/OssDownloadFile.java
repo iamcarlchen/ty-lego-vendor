@@ -3,12 +3,14 @@ package com.greatbee.core.lego.oss;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.OSSObject;
 import com.greatbee.base.bean.DBException;
+import com.greatbee.base.util.DataUtil;
 import com.greatbee.base.util.StringUtil;
 import com.greatbee.core.bean.server.FileStorage;
 import com.greatbee.core.bean.view.FileStream;
 import com.greatbee.core.lego.Input;
 import com.greatbee.core.lego.LegoException;
 import com.greatbee.core.lego.Output;
+import com.greatbee.core.lego.utils.VendorUtil;
 import com.greatbee.core.manager.TYDriver;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,8 @@ public class OssDownloadFile extends OssBase {
     private static final String Input_Key_File_Serialize_Name = "file_serialize_name";
     private static final String Input_Key_File_Name = "file_name";
 
+    private static final String Input_Key_Use_File_Storage = "useFileStorage";//是否使用TY库的fileStorage
+
     private static final String Output_Key_File_Stream = "file_stream";
 
     protected static final long ERROR_LEGO_OSS_Serialize_Name_Null = 300029L;
@@ -49,6 +53,7 @@ public class OssDownloadFile extends OssBase {
         String bucketName = input.getInputValue(Input_Key_Oss_Bucket_Name);
         String serializeName = input.getInputValue(Input_Key_File_Serialize_Name);
         String fileName = input.getInputValue(Input_Key_File_Name);
+        boolean useFileStorage = DataUtil.getBoolean(input.getInputValue(Input_Key_Use_File_Storage), false);
         if (StringUtil.isInvalid(bucketName)) {
             throw new LegoException("OSS存储空间名称无效", ERROR_LEGO_OSS_Bucket_Name_Null);
         }
@@ -67,13 +72,18 @@ public class OssDownloadFile extends OssBase {
         InputStream content = ossObject.getObjectContent();
 
         try {
-            FileStorage fileStorage = this.tyDriver.getFileStorageManager().getFileStorage(serializeName);
-
             FileStream fileStream = new FileStream(content);
-            fileStream.setContentType(fileStorage.getContentType());
-            fileStream.setFileName(StringUtil.isValid(fileName) ? fileName + now + "." + fileStorage.getFileType() : fileStorage.getOriginalName());
+            if(useFileStorage){
+                FileStorage fileStorage = this.tyDriver.getFileStorageManager().getFileStorage(serializeName);
+                fileStream.setContentType(fileStorage.getContentType());
+                fileStream.setFileName(StringUtil.isValid(fileName) ? fileName + now + "." + fileStorage.getFileType() : fileStorage.getOriginalName());
+            }else{
+                String[] fileSplits = serializeName.split("\\.");
+                String suffix = fileSplits[fileSplits.length - 1];
+                fileStream.setContentType(VendorUtil.findContentTypeBySuffix(suffix));
+                fileStream.setFileName(StringUtil.isValid(fileName) ? fileName + now + "." + suffix: serializeName);
+            }
             output.setOutputValue(Output_Key_File_Stream, fileStream);
-
         } catch (DBException e) {
             e.printStackTrace();
         }
