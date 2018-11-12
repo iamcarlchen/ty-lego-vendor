@@ -47,7 +47,7 @@ public class HtmlToPdf implements Lego {
         String pdfName = input.getInputValue(Input_Key_Pdf_Name);
         try {
             String locaPath = HtmlToPdf.class.getResource("/").getPath();
-            String tmpPath = TYPPC.d("upload.temp.dir");
+            String tmpPath = TYPPC.getTYProp("upload.temp.dir");
             if(StringUtil.isValid(tmpPath)){
                 File tmpFile = new File(tmpPath);
                 if(!tmpFile.getParentFile().exists()){
