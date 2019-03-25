@@ -6,9 +6,7 @@
 
     <groupId>greatbee</groupId>
     <artifactId>ty-lego-vendor</artifactId>
-
     <version>1.0.49</version>
-
 
     <name>ty-lego-vendor</name>
     <packaging>jar</packaging>
